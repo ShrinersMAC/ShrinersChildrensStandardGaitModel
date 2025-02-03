@@ -1,0 +1,84 @@
+"""
+Summary of changes in Shriner's Gait Model versions
+
+
+
+Updated on Aug 26, 2024
+Summary of Changes between Version Py3_v1.2 to Py3_v1.3--------------------------------------------------------------------------------------------------------------------
+
+1. In case of pointer use for identifying ASIS markers, only frames when both markers are present considered to identify frame when pointer was pressed.
+    a. This eliminates the need to trim the trial or fill gaps in Pointer Tip and Tail markers.
+
+2. mSHCG Foot Model Changes
+    a. Hindfoot Progression can be measured from x-rays and entered in Static
+    b. Returns zeros in MTP angles when Hallux marker is absent
+    c. Sitting Foot Static- Forward direction and Sitting Foot Static Frame number can be entered now
+    d. Ankle Complex Varus/Valgus Added to Static posture report and pdf.
+    e. Midfoot Ab/Adduction added to Static Pdf.
+
+4. GCD Changes
+    a. Inclination Angles added for Femur, Tibia and Foot
+    b. Following variables also added- Speed [cm/s], StrideLength[cm], StepLength[cm], Cadence[steps/min]
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+Updated on Feb 26, 2024
+Summary of Changes between Version Py3_v1.1 to Py3_v1.2--------------------------------------------------------------------------------------------------------------------
+1. For Wireless EMG users, Create GCD program can extract wireless EMG data. Tested for
+    a. Delsys (Montreal, Philadelphia, Chicago)
+    b. Noraxon (Lexington)
+    c. MLS (Wired system: Greenville, Chicago)
+
+2. Additional muscle identifiers are added to User Preferences file (Per request from Lexington & Montreal)
+    a. Gluteus Max
+    b. Gluteus Med
+    c. Adductors
+    d. Vastus Medialis
+    e. Lateral Hamstrings
+    f. Peroneus Longus
+    
+3. Wireless EMG signal tended to be very low magnitude (1e-5-1e-6) compared to wired EMG systems. An amplify EMG pipeline
+   was created to amplify EMG signal such that peak absolute EMG data value (across all channels) is 4.0.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Updated on Sep 27, 2023
+Summary of Change between Version Py3_v1.0 to Py3_v1.1--------------------------------------------------------------------------------------------------------------------
+1. For MAPS users
+    a. Following markers are added in Modeled Markers that are used for Progression Angles computations in Elroy's code:
+        - LASI, RASI, LKNE, RKNE, LANK, RANK
+    b. Following outputs are added in Python generated GCD for progression angles:
+        - LeftPelvicProgressAngle, RightPelvisProgressAngle
+        - LeftKneeProgressAngle, RightKneeProgressAngle
+        - LeftAnkleProgressAngle, RightAnkleProgressAngle
+    c. Standard Names for progression angles were decided to refer to Segment instead of joint. Following Outputs were added as standard output.
+        - LeftPelvicRotattion, RightPelvicRotation [These outputs existed in previous version, listed for completeness]
+        - LeftFemurRotation, RightFemurRotation
+        - LeftTibiaRotation, RightTibiaRotation
+    
+    Clarification: Section b. and c. refer to duplicate outputs with MAPS and Standard GCD variable names
+    
+2. For SLC MAC, modifications by Bruce MacWilliams
+    a. Joint Reaction Force output were added to Model Outputs in C3D. [Not in Python Generated GCDs yet]
+        - LAnkleForce, RAnkleForce
+        - LKneeForce, RKneeForce
+        - KHipForce, RHipForce
+        Note: Joint Reaction Force are exported in distal segment CS. Second Foot Coordinate system is added that uses Knee Joint Center instead of Lateral Ankle Marker.
+        This CS is used for Ankle Joint Reaction Force Output above
+    c. Ground Reaction Force output is added to Model Outputs in C3D that accounts for walking direction
+        - LGroundReactionForce, RGroundReactionForce
+    d. For Foot Model, superior calcaneus marker is added to Modeled Markers
+        - This marker reflects the hindfoot varus/valgus
+    e. MomentPowerSum varialbe is added to Model Outputs in C3D
+        - Index 0: Sum of Sagittal Plane Moments
+        - Index 1: Sum of Sagittal Power
+        - Index 2: Sum of Total Power
+    f. PelvisOrigin variable [PELO] is added to Model Outputs in C3D which is midpoint between Left and Right Hip Joint Center
+    g. COP relative to Pelvis is added to Model Outputs in C3d. This variable accounts for walking direction
+        - LGroundReactionMoment, RGroundReactionMoment
+        - Index 0: COP_Anterior
+        - Index 1: COP Medial/Lateral
+        - Index 2: Free Torque [adjusted for walkind direction]
+    h. COP relative to Ankle Joint Center is added to Model Outputs in C3d. 'Ankle_COP' is projected to Ground. Then transformed to Foot CS to account for Foot Progression 
+        - LFootCoP, RFootCoP
+    g. Gait event rounded up to next event iwth Even Offset is more than 1/2 video frame rate.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
