@@ -1,0 +1,82 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no" ?>
+<Pipeline>
+
+  <Entry DisplayName="Filter Trajectories - Butterworth" Enabled="1" OperationId="434" OperationName="FilterTrajectoriesButterworth">
+    <ParamList name="">
+      <Param macro="SELECTED_START_FRAME" name="FirstFrame"/>
+      <Param macro="SELECTED_END_FRAME" name="LastFrame"/>
+      <Param name="CutoffFrequency" value="10"/>
+      <Param name="FilterOrder" value="1"/>
+      <Param name="FilterType" value="0"/>
+      <Param macro="ALL_TRAJECTORIES" name="Trajectories"/>
+    </ParamList>
+  </Entry>
+
+  <Entry DisplayName="Filter Force Plates" Enabled="1" OperationId="435" OperationName="FilterDevicesButterworth">
+    <ParamList name="">
+      <Param macro="SELECTED_START_FRAME" name="FirstFrame"/>
+      <Param macro="SELECTED_END_FRAME" name="LastFrame"/>
+      <Param name="CutoffFrequency" value="100"/>
+      <Param name="FilterOrder" value="1"/>
+      <Param name="FilterType" value="0"/>
+      <Param macro="FORCEPLATE_DEVICES" name="Devices"/>
+    </ParamList>
+  </Entry>
+
+  <Entry DisplayName="Filter EMG" Enabled="1" OperationId="624" OperationName="FilterDevicesButterworth">
+    <ParamList name="">
+      <Param macro="SELECTED_START_FRAME" name="FirstFrame"/>
+      <Param macro="SELECTED_END_FRAME" name="LastFrame"/>
+      <Param name="CutoffFrequency" value="10"/>
+      <Param name="FilterOrder" value="1"/>
+      <Param name="FilterType" value="1"/>
+      <Param macro="OTHER_DEVICES" name="Devices"/>
+    </ParamList>
+  </Entry>
+
+  <Entry DisplayName="DynamicMain" Enabled="1" OperationId="437" OperationName="Python">
+    <ParamList name="" version="1">
+      <Param name="Script" value="C:\Users\Public\Documents\Vicon\Python\Py3_DynamicMain.py"/>
+      <Param name="ScriptArgs" value="BF"/>
+      <Param name="PythonCommand" value="python.exe"/>
+      <Param name="PythonPreScript" value=""/>
+      <Param name="LaunchPython" value="false"/>
+      <Param name="UseNexusPython" value="false"/>
+    </ParamList>
+  </Entry>
+
+  <Entry DisplayName="CreateGCD" Enabled="1" OperationId="625" OperationName="Python">
+    <ParamList name="" version="1">
+      <Param name="Script" value="M:/MAL Use Only/MAL Software Program Files/Python/Py3_CreateGCD.py"/>
+      <Param name="ScriptArgs" value="BF"/>
+      <Param name="PythonCommand" value="python.exe"/>
+      <Param name="PythonPreScript" value=""/>
+      <Param name="LaunchPython" value="false"/>
+      <Param name="UseNexusPython" value="false"/>
+    </ParamList>
+  </Entry>
+
+  <Entry DisplayName="Save Trial - C3D + VSK" Enabled="1" OperationId="439" OperationName="SaveOperation">
+    <ParamList name="">
+      <Param macro="SELECTED_START_FRAME" name="StartFrame"/>
+      <Param macro="SELECTED_END_FRAME" name="EndFrame"/>
+    </ParamList>
+  </Entry>
+
+  <Entry DisplayName="Export C3D" Enabled="1" OperationId="440" OperationName="Exportc3d">
+    <ParamList name="">
+      <Param macro="CURRENT_TRIAL" name="Filename"/>
+      <Param macro="SELECTED_START_FRAME" name="StartFrame"/>
+      <Param macro="SELECTED_END_FRAME" name="EndFrame"/>
+      <Param name="Postfix" value=""/>
+      <Param name="IntegerFormat" value="false"/>
+      <Param name="SubjectPrefix" value="1"/>
+      <Param name="XAxis" value="4"/>
+      <Param name="YAxis" value="2"/>
+      <Param name="ZAxis" value="0"/>
+      <Param name="ProcessingClip"/>
+      <Param name="CopyToClip"/>
+    </ParamList>
+  </Entry>
+
+</Pipeline>
