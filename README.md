@@ -44,7 +44,7 @@ The SCGM consists of 23 markers in total
 
 #### *Thigh/Shank*
 |                              | Landmark                | Location                                                                                           |
-|------------------------------|-------------------------|----------------------------------------------------------------------------------------------------|
+|-----------------------------:|-------------------------|----------------------------------------------------------------------------------------------------|
 |           Left/Right_Patella | Patella                 | Center of patella                                                                                  |
 |      Left/Right_Lateral_Knee | Lateral femoral condyle | Posterior lateral condyles at center of a visualized circle                                        |
 | *Left/Right_Medial_Knee.Cal** | Medial femoral condyle  | Posterior medial condyles at the center of a visualized circle, which could be fit to this anatomy |
@@ -57,7 +57,7 @@ The SCGM consists of 23 markers in total
 
 #### *Foot*
 |                                   | Landmark                                     | Location                                                                                        |
-|-----------------------------------|----------------------------------------------|-------------------------------------------------------------------------------------------------|
+|----------------------------------:|----------------------------------------------|-------------------------------------------------------------------------------------------------|
 |      Left/Right_Lateral_Malleolus | Fibula lateral malleolus                     | Lateral malleoli so that marker center lies on ankle flexion/extension axis.                    |
 | *Left/Right_Medial_Malleolus.Cal** | Tibia medial malleolus                       | Medial malleoli so marker center lies on ankle flexion/extension axis.                          |
 | Left/Right_Heel                   | Heel                                         | Medial/lateral center of posterior calcaneus                                                    |
@@ -77,14 +77,14 @@ The SCGM defines 8 distinct segments:
   5. Left/Right ankle
 
 The SCGM defines 10 distinct joints:
-| Joint    | Distal Segment | Proximal Segment | Cardan Order | Angles                               |
-|---------:|----------------|------------------|--------------|--------------------------------------|
-|  *Trunk* | Trunk          | Global           | [ZXY]        | X: Obliquity<br>Y: Tilt<br>Z: Rotation              |
-| *Pelvis* | Pelvis         | Global           | [ZXY]        | X: Obliquity<br>Y: Tilt<br>Z: Rotation              |
-| *Hip*    | Femur          | Pelvis           | [YXZ]        | X: Ab/Adduction<br>Y: Flex/Extension<br>Z: Rotation |
-| *Knee*   | Proximal Tibia | Femur            | [YXZ]        | X: Varus/Valgus<br>Y: Flex/Extension<br>Z: Rotation |
-| *Ankle*  | Foot           | Distal Tibia     | [YXZ]        | Y: Dorsi/Plantarflexion<br>Z: Rotation        |
-| *Foot*   | Foot           | Global           | [YXZ]        | Z: Foot progression                     |
+| Joint                     | Distal Segment   | Proximal Segment | Cardan Order     | Angles                                              |
+|--------------------------:|------------------|------------------|------------------|-----------------------------------------------------|
+| *Trunk*                   | Trunk            | Global           | [ZXY]            | X: Obliquity<br>Y: Tilt<br>Z: Rotation              |
+| *Pelvis*                  | Pelvis           | Global           | [ZXY]            | X: Obliquity<br>Y: Tilt<br>Z: Rotation              |
+| *Left/Right Hip*          | Femur            | Pelvis           | [YXZ]            | X: Ab/Adduction<br>Y: Flex/Extension<br>Z: Rotation |
+| *Left/Right Knee*         | Proximal Tibia   | Femur            | [YXZ]            | X: Varus/Valgus<br>Y: Flex/Extension<br>Z: Rotation |
+| *Left/Right Ankle*        | Foot             | Distal Tibia     | [YXZ]            | Y: Dorsi/Plantarflexion<br>Z: Rotation              |
+| *Left/Right Foot*         | Foot             | Global           | [YXZ]            | Z: Foot progression                                 |
 
 > [!NOTE]
 > The anatomic tibia is defined proximally for knee angle calculations and distally for ankle angle calculations in the SCGM. This ensures that tibial torsion does no pollute transverse knee and ankle rotation angles during gait.
@@ -99,13 +99,23 @@ Example spatiotemporal outputs for the right side based on 3 walking trials:
 ![spatiotemporal](User%20Guides/Media/spatiotemporal.png)
 
 #### *Kinematics*
-Calculated joint angles (15, bilaterally) are defined above:
+Calculated angles (15, bilaterally) for the joints described above:
+<br><br>
 ![kinematics](User%20Guides/Media/kinematics.png)
 
 #### *Kinetics*
-Reported kinetics are typically for the sagittal and coronal planes only:
+
+| Joint   | Distal Segment | Proximal Segment | Moments                                                                                  |
+|--------:|----------------|------------------|------------------------------------------------------------------------------------------|
+| *Left/Right Hip*         | Femur          | Pelvis           | X: Ab (+)/Adduction (-)<br> Y: Extension (+)/Flexion(-)<br> Z: Ext (+)/Int (-) Rotation  |
+| *Left/Right Knee*        | Proximal Tibia | Femur            | X: Valgus (+)/Varus (-)<br> Y: Extension (+)/Flexion (-)<br> Z: Ext (+)/Int (-) Rotation |
+| *Left/Right Ankle*       | Foot           | Distal Tibia     | Y: Plantar (+)/Dorsiflexion (-)<br> Z: Ext (+)/Int (-) Rotation                          |
+
 > [!NOTE]
 > Joint reaction forces and moments are defined internally in the Shriners Standard Gait Model – that is, a joint reaction force or moment component represents the sum total contributions from the joint structures that provide stability in the given plane.
+
+> [!NOTE]
+> Reported kinetics are typically for the sagittal and coronal planes only:
 <br>
 
 Sagittal kinetics: <br><br>
@@ -115,6 +125,7 @@ Coronal/Frontal kinetics: <br><br>
 ![kinetics](User%20Guides/Media/kinetics_coronal.png)
 
 #### *Muscle Lengths*
+Muscle lengths are estimated using [???]
 ![kinetics](User%20Guides/Media/muscle_lengths.png)
 
 
