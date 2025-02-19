@@ -69,8 +69,52 @@ The SCGM consists of 23 markers in total
 ![feet_markers](User%20Guides/Media/markers_feet.png)
 
 ### Segments
-+ The SCGM defines 8 distinct segments
+The SCGM defines 8 distinct segments:
+  1. Trunk
+  2. Pelvis
+  3. Left/Right femur
+  4. Left/Right tibia
+  5. Left/Right ankle
 
-+ The SCGM defines 10 distinct joints
+The SCGM defines 10 distinct joints:
+| Joint    | Distal Segment | Proximal Segment | Cardan Order | Angles                               |
+|---------:|----------------|------------------|--------------|--------------------------------------|
+|  *Trunk* | Trunk          | Global           | [ZXY]        | X: Obliquity<br>Y: Tilt<br>Z: Rotation              |
+| *Pelvis* | Pelvis         | Global           | [ZXY]        | X: Obliquity<br>Y: Tilt<br>Z: Rotation              |
+| *Hip*    | Femur          | Pelvis           | [YXZ]        | X: Ab/Adduction<br>Y: Flex/Extension<br>Z: Rotation |
+| *Knee*   | Proximal Tibia | Femur            | [YXZ]        | X: Varus/Valgus<br>Y: Flex/Extension<br>Z: Rotation |
+| *Ankle*  | Foot           | Distal Tibia     | [YXZ]        | Y: Dorsi/Plantarflexion<br>Z: Rotation        |
+| *Foot*   | Foot           | Global           | [YXZ]        | Z: Foot progression                     |
 
-### Kinematic and Kinetic Outputs
+> [!NOTE]
+> The anatomic tibia is defined proximally for knee angle calculations and distally for ankle angle calculations in the SCGM. This ensures that tibial torsion does no pollute transverse knee and ankle rotation angles during gait.
+
+> [!NOTE]
+> Three-dimensional ankle calculations are made as specified. However, ab/adduction of the foot is not an anatomically correct angle, due to the structure of the ankle joint. Therefore, ankle ab/adduction is not typically reported.
+
+
+### Biomechanical Outputs
+#### *Spatiotemporal*
+Example spatiotemporal outputs for the right side based on 3 walking trials:
+![spatiotemporal](User%20Guides/Media/spatiotemporal.png)
+
+#### *Kinematics*
+Calculated joint angles (15, bilaterally) are defined above:
+![kinematics](User%20Guides/Media/kinematics.png)
+
+#### *Kinetics*
+Reported kinetics are typically for the sagittal and coronal planes only:
+> [!NOTE]
+> Joint reaction forces and moments are defined internally in the Shriners Standard Gait Model – that is, a joint reaction force or moment component represents the sum total contributions from the joint structures that provide stability in the given plane.
+<br>
+
+Sagittal kinetics: <br><br>
+![kinetics](User%20Guides/Media/kinetics_sagittal.png)
+
+Coronal/Frontal kinetics: <br><br>
+![kinetics](User%20Guides/Media/kinetics_coronal.png)
+
+#### *Muscle Lengths*
+![kinetics](User%20Guides/Media/muscle_lengths.png)
+
+
