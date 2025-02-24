@@ -1,5 +1,5 @@
 # Shriners Children's Standard Gait Model (SCGM)
-Additional detail can be found within our recent publication in [Gait & Posture](10.1016/j.gaitpost.2024.09.007).
+Additional detail can be found within our recent publication in [Gait & Posture](https://pubmed.ncbi.nlm.nih.gov/39332309/).
 
 ## User Guides
 ### Licensing
