@@ -1,5 +1,5 @@
 # Shriners Children's Standard Gait Model (SCGM)
-Additional detail can be found within our recent publication in [Gait & Posture](10.1016/j.gaitpost.2024.03.006).
+Additional detail can be found within our recent publication in [Gait & Posture](10.1016/j.gaitpost.2024.09.007).
 
 ## User Guides
 ### Licensing
@@ -125,7 +125,7 @@ Coronal/Frontal kinetics: <br><br>
 ![kinetics](User%20Guides/Media/kinetics_coronal.png)
 
 #### *Muscle Lengths*
-Muscle lengths are estimated using [???]
+Muscle lengths are estimated using a musculoskeletal model. Body segment relationships derived from marker tracking are inputted to calculate the length of the muscle-tendon unit based on its anatomical placement and geometric properties within the model.
 ![kinetics](User%20Guides/Media/muscle_lengths.png)
 
 
