@@ -193,7 +193,7 @@ The SCGM defines 6 distinct joints:
 | *Left/Right MTP1*                 | Hallux           | Forefoot         | [YXZ]            | X: Extension(+)/Flexion(-)<br>Y: Varus(+)/Valgus(-)                                          |
 
 > [!NOTE]
-> An additional kinematic measure, supination index, is calculated using the outputs for hindfoot in/eversion(varus/valgus) and forefoot in/external rotation (ab
+> An additional kinematic measure, supination index, is calculated using the outputs for hindfoot in/eversion(varus/valgus) and forefoot in/external rotation(adduction/abduction)
 
 
 ### Biomechanical Outputs
