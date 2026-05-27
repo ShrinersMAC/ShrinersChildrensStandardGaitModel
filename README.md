@@ -130,3 +130,79 @@ Muscle lengths are estimated using a musculoskeletal model. Body segment relatio
 ![kinetics](User%20Guides/Media/muscle_lengths.png)
 
 
+# Shriners Standard Foot Model
+The basics of the Shriners Standard Foot Model are described below.
+
+For more in-depth model descriptions of the foot model, refer to the [Foot Model SOP](User%20Guides/4.FootModelSOP.pdf).
+
+## Model Overview
+### Foot Model Specific Anthropometric Measures
+
+|                                    | Measurement                                                                        | Usage                                            |
+|-----------------------------------:|------------------------------------------------------------------------------------|--------------------------------------------------|
+| VarValAngle (deg)                  | Varus/Valgus angle between the hindfoot and the floor Varus(+) / Valgus(-)         | Required modeling parameter                      |
+| CalcanealPitch (deg)               | Calcaneal Pitch calculated from a radiograph                                       | Optional radiograph model input                  |
+| HindfootProgression_relBiMal (deg) | Hindfoot progression relative to the bimalleolar axis calculated from a radiograph | Optional radiograph model input                  |
+| 1stRayPitch (deg)                  | 1st ray pitch calculated from a radiograph                                         | Optional radiograph model input                  |
+| ForefootProgression_relBiMal (deg) | Forefoor progression relative to the bimalleolar axis calculated from a radiograph | Optional radiograph model input                  |
+
+
+### Marker Set
+The Shriners Standard Foot Model consists of 45 markers in total. All segments besides the foot are defined the same way as the SCGM, so look above for those definitions.
+
+This section only covers the marker set for the feet
+
+#### *Foot:*
+|                                   | Landmark                                 | Location                                                                              |
+|----------------------------------:|------------------------------------------|---------------------------------------------------------------------------------------|
+| Left/Right_Lateral_Malleolus      | Fibula lateral malleolus                 | Lateral malleoli so marker center lies on ankle flexion/extension axis                |
+| Left/Right_Medial_Malleolus.Cal   | Tibia medial malleolus                   | Medial malleoli so marker center lies on ankle flexion/extension axis                 |
+| Left/Right_Posterior_Calcaneus    | Posterior calcaneus                      | Medial/lateral center of posterior calcaneus                                          |
+| Left/Right_Lateral_Calcaneus      | Lateral calcaneus                        | Lateral calcaneus, superior to bulge in heel pad                                      |
+| Left/Right_Medial_Calcaneus       | Medial calcaneus                         | Medial calcaneus, superior to bulge in heel pad                                       |
+| Left/Right_Peroneal_Trochlea.Cal  | Peroneal trochlea                        | Directly on peroneal trochlea of the lateral calcaneus                                |
+| Left/Right_1st_MT_Base            | Base of 1st metatarsal                   | Dorsal aspect of 1st metatarsal base, avoiding flexor hallucis longus tendon          |
+| Left/Right_1st_MT_Head            | Head of 1st metatarsal                   | Dorsal aspect of 1st metatarsal head, avoiding flexor hallucis longus tendon          |
+| Left/Right_1st_MT_Medial_Base.Cal | Base of 1st metatarsal                   | Medial aspect of base of 1st metatarsal                                               |
+| Left/Right_1st_MT_Medial_Head.Cal | Head of 1st metatarsal                   | Medial aspect of head of 1st metatarsal                                               |
+| Left/Right_2nd3rd_MT_Base.Cal     | Gap between 2nd and 3rd metatarsal bases | Dorsal aspect of the forefoot between 2nd and 3rd metatarsal bases                    |
+| Left/Right_2nd3rd_MT_Head.Cal     | Gap between 2nd and 3rd metatarsal heads | Dorsal aspect of the forefoot between 2nd and 3rd metatarsal heads (above MTP joints) |
+| Left/Right_5th_MT_Head            | Head of 5th metatarsal                   | Dorsal aspect of 5th metatarsal head, avoiding flexor digitorum longus tendon         |
+| Left/Right_1st_MTP_Joint.Cal      | 1st metatarsalphalongeal joint           | DOrsal aspect of 1st metatarsal head, just proximal to the MTP joint line             |
+| Left/Right_Hallux                 | Nail of hallux                           | Middle of the nail, aligning with the long axis of the hallux                         |
+
+
+
+
+![foot_markers](User%20Guides/Media/markers_footmodel_1.png)
+
+![foot_markers](User%20Guides/Media/markers_footmodel_2.png)
+
+
+### Segments
+The Shriners Standard Foot Model defines 6 distinct segments:
+  1. Left/Right hindfoot
+  4. Left/Right forefoot
+  5. Left/Right hallux
+
+The SCGM defines 6 distinct joints:
+| Joint                              | Distal Segment   | Proximal Segment | Cardan Order     | Angles                                                                                       |
+|-----------------------------------:|------------------|------------------|------------------|----------------------------------------------------------------------------------------------|
+| *Left/Right Hindfoot wrt Tibia*    | Hindfoot         | Tibia            | [YXZ]            | X: Dorsi(+)/Plantar(-)flexion<br>Y: In(+)/Eversion(-)<br>Z: Internal(+)/External(-) Rotation |
+| *Left/Right Forefoot wrt Hindfoot* | Forefoot         | Hindfoot         | [ZXY]            | X: Dorsi(+)/Plantar(-)flexion<br>Y: In(+)/Eversion(-)<br>Z: Add(+)/Abduction(-) Rotation |
+| *Left/Right MTP1*                 | Hallux           | Forefoot         | [YXZ]            | X: Extension(+)/Flexion(-)<br>Y: Varus(+)/Valgus(-)                                          |
+
+> [!NOTE]
+> An additional kinematic measure, supination index, is calculated using the outputs for hindfoot in/eversion(varus/valgus) and forefoot in/external rotation(adduction/abduction)
+
+
+### Biomechanical Outputs
+#### *Kinematics*
+Calculated angles (9, bilaterally) for the joints described above:
+<br><br>
+![kinematics](User%20Guides/Media/kinematics_footmodel.png)
+
+#### *Kinetics*
+> [!NOTE]
+> The Shriners Standard Foot Model does not attempt to provide kinetic calculations for the individual segments. Ankle kinetics are only described using the same methodology as the single segment foot model used in the Shriners Children’s Standard Gait Model (SCGM).
+
