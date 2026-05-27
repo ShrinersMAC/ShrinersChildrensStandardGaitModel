@@ -130,3 +130,7 @@ Muscle lengths are estimated using a musculoskeletal model. Body segment relatio
 ![kinetics](User%20Guides/Media/muscle_lengths.png)
 
 
+# Shriners Standard Foot Model
+The basics of the Shriners Standard Foot Model are described below.
+
+For more in-depth model descriptions of the foot model, refer to the [Foot Model SOP](User%20Guides/4.FootModelSOP.pdf).
