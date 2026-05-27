@@ -1,6 +1,42 @@
 """
 Summary of changes in Shriner's Gait Model versions
 
+Updated on Mar 27. 2026
+Summary of Changes between Version Py3_v1.4 to Py3_v1.5--------------------------------------------------------------------------------------------------------------------
+
+1. Harrington Hip Model Hybrid
+	- Added 'HarringtonHybrid' option for self.HipModelName in UserPreferences
+	- Main change to the hip joint center equations.
+		ML position is only dependent on Pelvic Width now instead of both Pelvic Width and Pelvic Depth
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+Updated on Nov 01. 2025
+Summary of Changes between Version Py3_v1.3 to Py3_v1.4--------------------------------------------------------------------------------------------------------------------
+
+1. Gait Model Static
+    a. User Preferences file is used from the directory where Py3_StaticMain.py program is located. It is not required to change the path of UserPreferences any more.
+    b. Bug fix: When anthropometric values were extracted from Nexus, sometimes those number were one integer lower. That has been fixed.
+
+2. Gait Model Kinetics implementation change
+    a. All force plates if marked are applied to compute kinetics
+    b. Trunk Angles are not exported in C3D and GCD file if Trunk markers are missing. Previously, it used to exports zeros.
+
+2. mSHCG Foot Model Changes
+    a. Two x-ray measured added
+		i. Hindfoot Progression relative to Bimalleolar Axis
+		ii Forefoot Progression relative to Bimalleolar Axis
+    b. Anatomical foot model markers are made optional if x-ray measured are entered. [Except 1st_MTP_Joint.Cal & 2nd3rd_MT_Head.Cal]
+    b. Sign convention specified for all foot model measure entries 
+    c. Ankle Progression Angle added to Static posture report and pdf
+    d. Rotation sequence changed for Midfoot Complex Angles to ROT [Forefoot relative to Hindfoot]
+		i. Midfoot Ab/Adduction is added for both ROT and TOR sequence in Static posture report and pdf.
+    e. Following variables added to C3D outputs: LMDFA_ROT, RMDFA_ROT, SupinationROT, SkewROT 
+    f. Following variables added to GCD outputs: LeftMidFootDorsiPlanFlexROT, LeftMidFootSupPronROT, LeftMidFootAbAdductROT, LeftSupinationROT, LeftSkewROT
+                                                 RightMidFootDorsiPlanFlexROT, RightMidFootSupPronROT, RightMidFootAbAdductROT, RightSupinationROT, RightSkewROT
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 
 Updated on Aug 26, 2024
