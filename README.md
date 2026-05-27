@@ -190,7 +190,7 @@ The SCGM defines 6 distinct joints:
 |-----------------------------------:|------------------|------------------|------------------|----------------------------------------------------------------------------------------------|
 | *Left/Right Hindfoot wrt Tibia*    | Hindfoot         | Tibia            | [YXZ]            | X: Dorsi(+)/Plantar(-)flexion<br>Y: In(+)/Eversion(-)<br>Z: Internal(+)/External(-) Rotation |
 | *Left/Right Forefoot wrt Hindfoot* | Forefoot         | Hindfoot         | [ZXY]            | X: Dorsi(+)/Plantar(-)flexion<br>Y: In(+)/Eversion(-)<br>Z: Internal(+)/External(-) Rotation |
-| *Left/Right MTP 1*                 | Hallux           | Forefoot         | [YXZ]            | X: Extension(+)/Flexion(-)<br>Y: Varus(+)/Valgus(-)                                          |
+| *Left/Right MTP1*                 | Hallux           | Forefoot         | [YXZ]            | X: Extension(+)/Flexion(-)<br>Y: Varus(+)/Valgus(-)                                          |
 
 
 ### Biomechanical Outputs
