@@ -189,16 +189,18 @@ The SCGM defines 6 distinct joints:
 | Joint                              | Distal Segment   | Proximal Segment | Cardan Order     | Angles                                                                                       |
 |-----------------------------------:|------------------|------------------|------------------|----------------------------------------------------------------------------------------------|
 | *Left/Right Hindfoot wrt Tibia*    | Hindfoot         | Tibia            | [YXZ]            | X: Dorsi(+)/Plantar(-)flexion<br>Y: In(+)/Eversion(-)<br>Z: Internal(+)/External(-) Rotation |
-| *Left/Right Forefoot wrt Hindfoot* | Forefoot         | Hindfoot         | [ZXY]            | X: Dorsi(+)/Plantar(-)flexion<br>Y: In(+)/Eversion(-)<br>Z: Internal(+)/External(-) Rotation |
+| *Left/Right Forefoot wrt Hindfoot* | Forefoot         | Hindfoot         | [ZXY]            | X: Dorsi(+)/Plantar(-)flexion<br>Y: In(+)/Eversion(-)<br>Z: Add(+)/Abduction(-) Rotation |
 | *Left/Right MTP1*                 | Hallux           | Forefoot         | [YXZ]            | X: Extension(+)/Flexion(-)<br>Y: Varus(+)/Valgus(-)                                          |
+
+> [!NOTE]
+> An additional kinematic measure, supination index, is calculated using the outputs for hindfoot in/eversion(varus/valgus) and forefoot in/external rotation (ab
 
 
 ### Biomechanical Outputs
-
 #### *Kinematics*
-Calculated angles (15, bilaterally) for the joints described above:
+Calculated angles (9, bilaterally) for the joints described above:
 <br><br>
-![kinematics](User%20Guides/Media/kinematics.png)
+![kinematics](User%20Guides/Media/kinematics_footmodel.png)
 
 #### *Kinetics*
 > [!NOTE]
