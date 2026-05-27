@@ -21,13 +21,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # Gait Model Coordinate Systems for Segment and Joints
 
 Created on Mon Feb 19 15:57:33 2018
-Last Update: 26 Aug, 2024
+Last Update: Mar 27, 2026
 
 @author: psaraswat
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 """
-
-VersionNumber = 'Py3_v1.3'
+VersionNumber = 'Py3_v1.5'
 
 import numpy as np
 import Py3_MathModules as math
@@ -204,6 +203,38 @@ def JointCenterModel_Hip_Harrington2(Side, ASISdist, LeftLegLength, RightLegLeng
         HipCenterPelvis[1] =  -0.28*PelvicDepth - 0.16*PelvicWidth - 7.9
     if Side == 'Left':
         HipCenterPelvis[1] =  +0.28*PelvicDepth + 0.16*PelvicWidth + 7.9
+    HipCenterPelvis[2] = -0.16*PelvicWidth - 0.04*LongerLegLength - 7.1
+    
+    
+    #compute hip location relative to lab origin and expressed relative to lab coordinate system
+    HipCenterLab = math.TransformPointIntoLabCoors(HipCenterPelvis, EPelvisTech, MidASISLab)
+    
+    return([HipCenterPelvis, HipCenterLab])
+
+def JointCenterModel_Hip_HarringtonHybrid(Side, ASISdist, LeftLegLength, RightLegLength, RASIS, LASIS, SACR, EPelvisTech, MidASISLab):
+    
+    #PelvicWidth = np.linalg.norm(LASIS-RASIS)
+    PelvicWidth = ASISdist
+    PelvicDepth = np.linalg.norm((LASIS+RASIS)/2 - SACR)
+    LongerLegLength = max(LeftLegLength, RightLegLength)
+    
+    #define hip center relative to a pelvis coordinate syste (Origin at MidASIS)
+    HipCenterPelvis = np.array([0.,0.,0.])
+    
+    # Single Linear Regression Equations
+#    HipCenterPelvis[0] = -0.24 * PelvicDepth - 9.9
+#    if Side == 'Right':
+#        HipCenterPelvis[1] =  -0.33*PelvicWidth - 7.3
+#    if Side == 'Left':
+#        HipCenterPelvis[1] =  +0.33*PelvicWidth + 7.3
+#    HipCenterPelvis[2] = -0.30*PelvicWidth -10.9
+    
+    # Two Variable Regression Equations
+    HipCenterPelvis[0] = -0.24 * PelvicDepth - 9.9
+    if Side == 'Right':
+        HipCenterPelvis[1] =  -0.33*PelvicWidth - 7.3
+    if Side == 'Left':
+        HipCenterPelvis[1] =  +0.33*PelvicWidth + 7.3
     HipCenterPelvis[2] = -0.16*PelvicWidth - 0.04*LongerLegLength - 7.1
     
     
@@ -588,8 +619,8 @@ def TechCS_Hallux_mSHCG(Side, HLX, MTP1, TOE):
     
     return EHalluxTech        
     
-def AnatCS_Hindfoot_mSHCG(Side, LCAL, MCAL, HEEL, CALPT, 
-                          HindfootVarus, CalcanealPitch, HindfootProgression, HindFootValgusIsNegative):
+def AnatCS_Hindfoot_mSHCG(Side, LCAL, MCAL, HEEL, CALPT, LANK, MANK,
+                          HindfootVarus, CalcanealPitch, HindfootProgression_reltoBiMal, HindFootValgusIsNegative):
 
     # Create hindfoot CS reflecting the A/P (x) hindfoot orientation and plantar surface
     CCAL = (LCAL + MCAL) /2 
@@ -606,14 +637,43 @@ def AnatCS_Hindfoot_mSHCG(Side, LCAL, MCAL, HEEL, CALPT,
     EHindfootSagittal_Origin = np.array([HEEL[0],HEEL[1],0])
     
     # Compute Hindfoot Angles
-    if HindfootProgression == '':
+    if HindfootProgression_reltoBiMal == '':
         HindfootProgressionAngle = np.arctan2(HindfootProgressionVector[1],HindfootProgressionVector[0])
     else:
+        # Compute Hindfoot Progression from HindfootProgression_relToBi-mal
         if Side == 'Left':
-            HindfootProgressionAngle = -(np.pi/180) * float(HindfootProgression)
-        else:
-            HindfootProgressionAngle = (np.pi/180) * float(HindfootProgression)
-    
+            AnkleVector = math.ComputeUnitVecFromPts(LANK, MANK)
+            VerticalVector = np.array([0.,0.,1.])
+            AnkleProgressionVector = np.cross(VerticalVector,AnkleVector)
+            HindfootProgression_reltoBiMal_rad = -(np.pi/180) * float(HindfootProgression_reltoBiMal)
+            # Use Rodriques' Formula [Rotate vector v around rotatio axis k by angle θ]
+            # v′ = vcosθ + (k×v) sinθ + k (k⋅v)(1−cosθ)
+            HindfootProgressionVector = AnkleProgressionVector * np.cos(HindfootProgression_reltoBiMal_rad) + \
+                                        np.cross(VerticalVector,AnkleProgressionVector) * np.sin(HindfootProgression_reltoBiMal_rad) + \
+                                        np.dot(VerticalVector,AnkleProgressionVector) * VerticalVector * (1-np.cos(HindfootProgression_reltoBiMal_rad))
+            
+            HindfootProgressionAngle = np.arctan2(HindfootProgressionVector[1],HindfootProgressionVector[0])    
+            # print('Left Hindfoot')
+            # print(LANK,MANK,AnkleVector)
+            # print(AnkleProgressionVector)
+            # print(HindfootProgression_reltoBiMal_rad,HindfootProgression_reltoBiMal)
+            # print(HindfootProgressionVector)
+        else: # Right
+            AnkleVector = math.ComputeUnitVecFromPts(LANK, MANK)
+            VerticalVector = np.array([0.,0.,1.])
+            AnkleProgressionVector = np.cross(AnkleVector,VerticalVector)
+            HindfootProgression_reltoBiMal_rad = (np.pi/180) * float(HindfootProgression_reltoBiMal)
+            # Use Rodriques' Formula [Rotate vector v around rotatio axis k by angle θ]
+            # v′ = vcosθ + (k×v) sinθ + k (k⋅v)(1−cosθ)
+            HindfootProgressionVector = AnkleProgressionVector * np.cos(HindfootProgression_reltoBiMal_rad) + \
+                                        np.cross(VerticalVector,AnkleProgressionVector) * np.sin(HindfootProgression_reltoBiMal_rad) + \
+                                        np.dot(VerticalVector,AnkleProgressionVector) * VerticalVector * (1-np.cos(HindfootProgression_reltoBiMal_rad))
+            
+            HindfootProgressionAngle = np.arctan2(HindfootProgressionVector[1],HindfootProgressionVector[0])
+            # print('Right Hindfoot')
+            # print(AnkleProgressionVector)
+            # print(HindfootProgression_reltoBiMal_rad,HindfootProgression_reltoBiMal)
+            # print(HindfootProgressionVector)
     # If Calcaneal Pitch is entered, then do not use CALPT marker
     if CalcanealPitch == '':
         # Compute projection of CALPT on HindfootSagittal Plane
@@ -677,11 +737,50 @@ def AnatCS_Hindfoot_mSHCG(Side, LCAL, MCAL, HEEL, CALPT,
     
     return EHindfootAnat
 
-def AnatCS_Forefoot_mSHCG(Side, MT23B, MT23H, MT1BM, MT1HM,
-                          FirstMetatarsalPitch):
-    
+def AnatCS_Forefoot_mSHCG(Side, MT23B, MT23H, MT1BM, MT1HM, LANK, MANK,
+                          FirstMetatarsalPitch, ForefootProgression_reltoBiMal):
     # Sagittal Plane
-    ForefootProgressionVector = MT23H - MT23B
+    if ForefootProgression_reltoBiMal == '': 
+        ForefootProgressionVector = MT23H - MT23B
+        if MT23H[2] == 0 or MT23B[2] == 0:
+            AnkleVector = math.ComputeUnitVecFromPts(LANK, MANK)
+            VerticalVector = np.array([0.,0.,1.])
+            if Side == 'Left':
+                AnkleProgressionVector = np.cross(VerticalVector,AnkleVector)
+            else:
+                AnkleProgressionVector = np.cross(AnkleVector,VerticalVector)
+            ForefootProgressionVector = AnkleProgressionVector
+    else:
+        # Don't use MT23B & MT23H markers if forefoot progression is entered.
+        if Side == 'Left':
+            AnkleVector = math.ComputeUnitVecFromPts(LANK, MANK)
+            VerticalVector = np.array([0.,0.,1.])
+            AnkleProgressionVector = np.cross(VerticalVector,AnkleVector)
+            ForefootProgression_reltoBiMal_rad = -(np.pi/180) * float(ForefootProgression_reltoBiMal)
+            # Use Rodriques' Formula [Rotate vector v around rotatio axis k by angle θ]
+            # v′ = vcosθ + (k×v) sinθ + k (k⋅v)(1−cosθ)
+            ForefootProgressionVector = AnkleProgressionVector * np.cos(ForefootProgression_reltoBiMal_rad) + \
+                                        np.cross(VerticalVector,AnkleProgressionVector) * np.sin(ForefootProgression_reltoBiMal_rad) + \
+                                        np.dot(VerticalVector,AnkleProgressionVector) * VerticalVector * (1-np.cos(ForefootProgression_reltoBiMal_rad))   
+            # print('Left Forefoot')
+            # print(AnkleProgressionVector)
+            # print(ForefootProgression_reltoBiMal,ForefootProgression_reltoBiMal_rad)
+            # print(ForefootProgressionVector)
+        else: # Right
+            AnkleVector = math.ComputeUnitVecFromPts(LANK, MANK)
+            VerticalVector = np.array([0.,0.,1.])
+            AnkleProgressionVector = np.cross(AnkleVector,VerticalVector)
+            ForefootProgression_reltoBiMal_rad = (np.pi/180) * float(ForefootProgression_reltoBiMal)
+            # Use Rodriques' Formula [Rotate vector v around rotatio axis k by angle θ]
+            # v′ = vcosθ + (k×v) sinθ + k (k⋅v)(1−cosθ)
+            ForefootProgressionVector = AnkleProgressionVector * np.cos(ForefootProgression_reltoBiMal_rad) + \
+                                        np.cross(VerticalVector,AnkleProgressionVector) * np.sin(ForefootProgression_reltoBiMal_rad) + \
+                                        np.dot(VerticalVector,AnkleProgressionVector) * VerticalVector * (1-np.cos(ForefootProgression_reltoBiMal_rad)) 
+            # print('Left Forefoot')
+            # print(AnkleProgressionVector)
+            # print(ForefootProgression_reltoBiMal,ForefootProgression_reltoBiMal_rad)
+            # print(ForefootProgressionVector)
+
     ProjectedForefootProgressionVector = np.array([ForefootProgressionVector[0],ForefootProgressionVector[1],0.])
     
     eSagittalx = ProjectedForefootProgressionVector/ np.linalg.norm(ProjectedForefootProgressionVector)
@@ -699,6 +798,11 @@ def AnatCS_Forefoot_mSHCG(Side, MT23B, MT23H, MT1BM, MT1HM,
         ForefootPitchVectorEForefootSagittal = math.TransformVectorIntoMovingCoors(ForefootPitchVectorLab,EForefootSagittal)
         ProjectedForefootPitchVectorEForefootSagittal = np.array([ForefootPitchVectorEForefootSagittal[0],0,ForefootPitchVectorEForefootSagittal[2]])
         ex = math.TransformVectorIntoLabCoors(ProjectedForefootPitchVectorEForefootSagittal, EForefootSagittal)
+        if MT23H[2] == 0 or MT23B[2] == 0: # Set Forefoot pitch to zero
+            ForefootPitchAngle = float(0) * np.pi/ 180
+            ex = eSagittalx* np.cos(ForefootPitchAngle) + \
+                np.cross(eSagittaly,eSagittalx)* np.sin(ForefootPitchAngle) + \
+                np.dot(eSagittaly,eSagittalx) * eSagittaly *(1-np.cos(ForefootPitchAngle))
     else:
         # Rotate by defined pitch angle around y-axis
         # Use rodrigues formula

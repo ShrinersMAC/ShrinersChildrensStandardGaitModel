@@ -21,13 +21,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # Dynamic model computes kinematics and kinetics
 
 Created on Mon Mar 19 12:16:37 2018
-Last Update: 26 Aug, 2024
+Last Update: Mar 27, 2026
 
 @author: psaraswat
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 """
-VersionNumber = 'Py3_v1.3'
+VersionNumber = 'Py3_v1.5'
 
+import os
 import numpy as np
 import sys
     
@@ -54,8 +55,9 @@ if len(sys.argv) > 1:
 
 #StaticDataFileName = FilePath + 'Static_BF_' + SubjectName + '.py'
 # Condition- Barefoot (BF) string read as Script Argument
-StaticDataFileName = FilePath + 'Static_' + TestingCondition + '_' + SubjectName + '.py'
-
+StaticDataFileName = os.path.join(FilePath, 'Static_' + TestingCondition + '_' + SubjectName + '.py')
+# Set Force Plate threshold
+ForcePlate_Threshold = 10
 
 class Dynamic_Main():
     def __init__(self):
@@ -91,9 +93,9 @@ class Dynamic_Main():
                 except:
                     LeftPSISMarkerX, LeftPSISMarkerY, LeftPSISMarkerZ, LeftPSISMarkerExists = MarkerArrayCheck(SubjectName, self.LeftPSISMarkerName)
                     RightPSISMarkerX, RightPSISMarkerY, RightPSISMarkerZ, RightPSISMarkerExists = MarkerArrayCheck(SubjectName, self.RightPSISMarkerName)
-                    SacralMarkerX = (LeftPSISMarkerX + RightPSISMarkerX) / 2
-                    SacralMarkerY = (LeftPSISMarkerY + RightPSISMarkerY) / 2
-                    SacralMarkerZ = (LeftPSISMarkerZ + RightPSISMarkerZ) / 2
+                    SacralMarkerX = (np.array(LeftPSISMarkerX) + np.array(RightPSISMarkerX)) / 2
+                    SacralMarkerY = (np.array(LeftPSISMarkerY) + np.array(RightPSISMarkerY)) / 2
+                    SacralMarkerZ = (np.array(LeftPSISMarkerZ) + np.array(RightPSISMarkerZ)) / 2
             
             if self.valuePelvicFixCheck == '2': # Triad Opton
                 # For Sacral Triad Case, delete Sacral Marker Name
@@ -148,15 +150,21 @@ class Dynamic_Main():
             vicon.SetTrajectory(SubjectName, self.RightASISMarkerName, arrayRASISMarkerX, arrayRASISMarkerY, arrayRASISMarkerZ, exists )
         ################################################################################################
         # Compute Heel, Toe and MTP1 Markers if Foot Model is Used         
-        if self.valueLeftFootModelCheck == '1':
-            LeftFirstMetarsalBaseMarkerX, LeftFirstMetarsalBaseMarkerY, LeftFirstMetarsalBaseMarkerZ, LeftFirstMetarsalBaseMarkerExists = MarkerArrayCheck(SubjectName, self.LeftFirstMetarsalBaseMarkerName)
-            LeftFirstMetarsalHeadMarkerX, LeftFirstMetarsalHeadMarkerY, LeftFirstMetarsalHeadMarkerZ, LeftFirstMetarsalHeadMarkerExists = MarkerArrayCheck(SubjectName, self.LeftFirstMetarsalHeadMarkerName)
-            LeftFifthMetarsalHeadMarkerX, LeftFifthMetarsalHeadMarkerY, LeftFifthMetarsalHeadMarkerZ, LeftFifthMetarsalHeadMarkerExists = MarkerArrayCheck(SubjectName, self.LeftFifthMetarsalHeadMarkerName)
-        
-        if self.valueRightFootModelCheck == '1':
-            RightFirstMetarsalBaseMarkerX, RightFirstMetarsalBaseMarkerY, RightFirstMetarsalBaseMarkerZ, RightFirstMetarsalBaseMarkerExists = MarkerArrayCheck(SubjectName, self.RightFirstMetarsalBaseMarkerName)
-            RightFirstMetarsalHeadMarkerX, RightFirstMetarsalHeadMarkerY, RightFirstMetarsalHeadMarkerZ, RightFirstMetarsalHeadMarkerExists = MarkerArrayCheck(SubjectName, self.RightFirstMetarsalHeadMarkerName)
-            RightFifthMetarsalHeadMarkerX, RightFifthMetarsalHeadMarkerY, RightFifthMetarsalHeadMarkerZ, RightFifthMetarsalHeadMarkerExists = MarkerArrayCheck(SubjectName, self.RightFifthMetarsalHeadMarkerName)
+        if hasattr(self, "valueLeftFootModelCheck"):
+            if self.valueLeftFootModelCheck == '1':
+                LeftFirstMetarsalBaseMarkerX, LeftFirstMetarsalBaseMarkerY, LeftFirstMetarsalBaseMarkerZ, LeftFirstMetarsalBaseMarkerExists = MarkerArrayCheck(SubjectName, self.LeftFirstMetarsalBaseMarkerName)
+                LeftFirstMetarsalHeadMarkerX, LeftFirstMetarsalHeadMarkerY, LeftFirstMetarsalHeadMarkerZ, LeftFirstMetarsalHeadMarkerExists = MarkerArrayCheck(SubjectName, self.LeftFirstMetarsalHeadMarkerName)
+                LeftFifthMetarsalHeadMarkerX, LeftFifthMetarsalHeadMarkerY, LeftFifthMetarsalHeadMarkerZ, LeftFifthMetarsalHeadMarkerExists = MarkerArrayCheck(SubjectName, self.LeftFifthMetarsalHeadMarkerName)
+        else:
+            self.valueLeftFootModelCheck = '0'
+            
+        if hasattr(self, "valueRightFootModelCheck"):
+            if self.valueRightFootModelCheck == '1':
+                RightFirstMetarsalBaseMarkerX, RightFirstMetarsalBaseMarkerY, RightFirstMetarsalBaseMarkerZ, RightFirstMetarsalBaseMarkerExists = MarkerArrayCheck(SubjectName, self.RightFirstMetarsalBaseMarkerName)
+                RightFirstMetarsalHeadMarkerX, RightFirstMetarsalHeadMarkerY, RightFirstMetarsalHeadMarkerZ, RightFirstMetarsalHeadMarkerExists = MarkerArrayCheck(SubjectName, self.RightFirstMetarsalHeadMarkerName)
+                RightFifthMetarsalHeadMarkerX, RightFifthMetarsalHeadMarkerY, RightFifthMetarsalHeadMarkerZ, RightFifthMetarsalHeadMarkerExists = MarkerArrayCheck(SubjectName, self.RightFifthMetarsalHeadMarkerName)
+        else:
+            self.valueRightFootModelCheck = '0'
         
         #Compute markers for each frame            
         framecount = vicon.GetFrameCount()
@@ -281,18 +289,24 @@ class Dynamic_Main():
             #RightFirstMetatarsoPhalangealJointMarkerX, RightFirstMetatarsoPhalangealJointMarkerY, RightFirstMetatarsoPhalangealJointMarkerZ, RightFirstMetatarsoPhalangealJointMarkerExists = MarkerArrayCheck(SubjectName, self.RightFirstMetatarsoPhalangealJointMarkerName)
             RightHalluxMarkerX, RightHalluxMarkerY, RightHalluxMarkerZ, RightHalluxMarkerExists = MarkerArrayCheck(SubjectName, self.RightHalluxMarkerName)
         
-        
-        # Tibial Triad Check 
-        if vicon.HasTrajectory(SubjectName,self.LeftTibialMarkerName) is True and vicon.HasTrajectory(SubjectName,self.LeftTibialUpperMarkerName) is True and vicon.HasTrajectory(SubjectName,self.LeftTibialLowerMarkerName) is True:
-            LeftTibialTriadCheck = True
-            LeftTibialUpperMarkerX, LeftTibialUpperMarkerY, LeftTibialUpperMarkerZ, LeftTibialUpperMarkerExists = MarkerArrayCheck(SubjectName, self.LeftTibialUpperMarkerName)
-            LeftTibialLowerMarkerX, LeftTibialLowerMarkerY, LeftTibialLowerMarkerZ, LeftTibialLowerMarkerExists = MarkerArrayCheck(SubjectName, self.LeftTibialLowerMarkerName)
-        else: 
+        if self.valueLeftFootModelCheck == '1':
+            # Tibial Triad Check 
+            if vicon.HasTrajectory(SubjectName,self.LeftTibialMarkerName) is True and vicon.HasTrajectory(SubjectName,self.LeftTibialUpperMarkerName) is True and vicon.HasTrajectory(SubjectName,self.LeftTibialLowerMarkerName) is True:
+                LeftTibialTriadCheck = True
+                LeftTibialUpperMarkerX, LeftTibialUpperMarkerY, LeftTibialUpperMarkerZ, LeftTibialUpperMarkerExists = MarkerArrayCheck(SubjectName, self.LeftTibialUpperMarkerName)
+                LeftTibialLowerMarkerX, LeftTibialLowerMarkerY, LeftTibialLowerMarkerZ, LeftTibialLowerMarkerExists = MarkerArrayCheck(SubjectName, self.LeftTibialLowerMarkerName)
+            else: 
+                LeftTibialTriadCheck = False
+        else:
             LeftTibialTriadCheck = False
-        if vicon.HasTrajectory(SubjectName,self.RightTibialMarkerName) is True and vicon.HasTrajectory(SubjectName,self.RightTibialUpperMarkerName) is True and vicon.HasTrajectory(SubjectName,self.RightTibialLowerMarkerName) is True:
-            RightTibialTriadCheck = True
-            RightTibialUpperMarkerX, RightTibialUpperMarkerY, RightTibialUpperMarkerZ, RightTibialUpperMarkerExists = MarkerArrayCheck(SubjectName, self.RightTibialUpperMarkerName)
-            RightTibialLowerMarkerX, RightTibialLowerMarkerY, RightTibialLowerMarkerZ, RightTibialLowerMarkerExists = MarkerArrayCheck(SubjectName, self.RightTibialLowerMarkerName)
+            
+        if self.valueRightFootModelCheck == '1':
+            if vicon.HasTrajectory(SubjectName,self.RightTibialMarkerName) is True and vicon.HasTrajectory(SubjectName,self.RightTibialUpperMarkerName) is True and vicon.HasTrajectory(SubjectName,self.RightTibialLowerMarkerName) is True:
+                RightTibialTriadCheck = True
+                RightTibialUpperMarkerX, RightTibialUpperMarkerY, RightTibialUpperMarkerZ, RightTibialUpperMarkerExists = MarkerArrayCheck(SubjectName, self.RightTibialUpperMarkerName)
+                RightTibialLowerMarkerX, RightTibialLowerMarkerY, RightTibialLowerMarkerZ, RightTibialLowerMarkerExists = MarkerArrayCheck(SubjectName, self.RightTibialLowerMarkerName)
+            else: 
+                RightTibialTriadCheck = False
         else: 
             RightTibialTriadCheck = False
         #print LeftTibialTriadCheck, RightTibialTriadCheck
@@ -425,6 +439,7 @@ class Dynamic_Main():
         if self.valueLeftFootModelCheck == '1':
             arrayLeftAnkleComplexAngles = [[0. for m in range(framecount)] for n in range(3)]
             arrayLeftMidfootAngles = [[0. for m in range(framecount)] for n in range(3)]
+            arrayLeftMidfootAnglesROT = [[0. for m in range(framecount)] for n in range(3)]
             arrayLeftToesAngles = [[0. for m in range(framecount)] for n in range(3)]
         
         arrayRightHipAngles = [[0. for m in range(framecount)] for n in range(3)]
@@ -435,6 +450,7 @@ class Dynamic_Main():
         if self.valueRightFootModelCheck == '1':
             arrayRightAnkleComplexAngles = [[0. for m in range(framecount)] for n in range(3)]
             arrayRightMidfootAngles = [[0. for m in range(framecount)] for n in range(3)]
+            arrayRightMidfootAnglesROT = [[0. for m in range(framecount)] for n in range(3)]
             arrayRightToesAngles = [[0. for m in range(framecount)] for n in range(3)]
         
         
@@ -463,6 +479,7 @@ class Dynamic_Main():
         if self.valueLeftFootModelCheck == '1':
             arrayLeftAnkleComplexAnglesRad = [[0. for m in range(framecount)] for n in range(3)]
             arrayLeftMidfootAnglesRad = [[0. for m in range(framecount)] for n in range(3)]
+            arrayLeftMidfootAnglesROTRad = [[0. for m in range(framecount)] for n in range(3)]
             arrayLeftToesAnglesRad = [[0. for m in range(framecount)] for n in range(3)]
             
         arrayRightHipAnglesRad = [[0. for m in range(framecount)] for n in range(3)]
@@ -471,11 +488,15 @@ class Dynamic_Main():
         if self.valueRightFootModelCheck == '1':
             arrayRightAnkleComplexAnglesRad = [[0. for m in range(framecount)] for n in range(3)]
             arrayRightMidfootAnglesRad = [[0. for m in range(framecount)] for n in range(3)]
+            arrayRightMidfootAnglesROTRad = [[0. for m in range(framecount)] for n in range(3)]
             arrayRightToesAnglesRad = [[0. for m in range(framecount)] for n in range(3)]
         
         if self.valueLeftFootModelCheck == '1' or self.valueRightFootModelCheck == '1':
             arraySupination = [[0. for m in range(framecount)] for n in range(3)]
             arraySkew = [[0. for m in range(framecount)] for n in range(3)]
+            arraySupinationROT = [[0. for m in range(framecount)] for n in range(3)]
+            arraySkewROT = [[0. for m in range(framecount)] for n in range(3)]
+            
             
         arrayHATCenterOfMass = [[0. for m in range(framecount)] for n in range(3)]
         arrayLeftThighCenterOfMass = [[0. for m in range(framecount)] for n in range(3)]
@@ -837,9 +858,14 @@ class Dynamic_Main():
                 [LeftHipCenterPelvis, LeftHipCenterLab] = gait.JointCenterModel_Hip_Harrington('Left', self.valueASISdist, RightASISMarker, LeftASISMarker, SacralMarker, EPelvisTech, MidASISLab)
                 [RightHipCenterPelvis, RightHipCenterLab] = gait.JointCenterModel_Hip_Harrington('Right', self.valueASISdist, RightASISMarker, LeftASISMarker, SacralMarker, EPelvisTech, MidASISLab)
             if self.HipModelName == 'Harrington2':
-                # Harrington Hip Model- 2 variable
+                # Harrington Hip Model- Uses Leg Length variable
                 [LeftHipCenterPelvis, LeftHipCenterLab] = gait.JointCenterModel_Hip_Harrington2('Left', self.valueASISdist, self.valueLeftLegLength, self.valueRightLegLength, RightASISMarker, LeftASISMarker, SacralMarker, EPelvisTech, MidASISLab)
                 [RightHipCenterPelvis, RightHipCenterLab] = gait.JointCenterModel_Hip_Harrington2('Right', self.valueASISdist, self.valueLeftLegLength, self.valueRightLegLength, RightASISMarker, LeftASISMarker, SacralMarker, EPelvisTech, MidASISLab)
+            if self.HipModelName == 'HarringtonHybrid':
+                # Harrington Hip Model- Uses Leg Length for SI position, PW for ML position
+                [LeftHipCenterPelvis, LeftHipCenterLab] = gait.JointCenterModel_Hip_HarringtonHybrid('Left', self.valueASISdist, self.valueLeftLegLength, self.valueRightLegLength, RightASISMarker, LeftASISMarker, SacralMarker, EPelvisTech, MidASISLab)
+                [RightHipCenterPelvis, RightHipCenterLab] = gait.JointCenterModel_Hip_HarringtonHybrid('Right', self.valueASISdist, self.valueLeftLegLength, self.valueRightLegLength, RightASISMarker, LeftASISMarker, SacralMarker, EPelvisTech, MidASISLab)
+            
             
             # Compute Technical Coordinate System: Thigh   
             LeftEThighTech = gait.TechCS_Thigh_Newington('Left', LeftHipCenterLab, LeftThighMarker, LeftLateralKneeMarker)
@@ -1029,6 +1055,7 @@ class Dynamic_Main():
             if self.valueLeftFootModelCheck == '1':
                 LeftAnkleComplexAnglesRad = math.EulerAngles_YXZ(LeftEHindfootAnat, LeftEShankDistalAnat)
                 LeftMidfootAnglesRad = math.EulerAngles_YXZ(LeftEForefootAnat, LeftEHindfootAnat)
+                LeftMidfootAnglesROTRad = math.EulerAngles_ZXY(LeftEForefootAnat, LeftEHindfootAnat)
                 if not LeftHalluxMarker[2] == 0: # if Hallux marker missing, set ToeAngles to zero
                     LeftToesAnglesRad = math.EulerAngles_YXZ(LeftEHalluxAnat, LeftEForefootAnat)
                 else:
@@ -1037,6 +1064,7 @@ class Dynamic_Main():
             if self.valueRightFootModelCheck == '1':
                 RightAnkleComplexAnglesRad = math.EulerAngles_YXZ(RightEHindfootAnat, RightEShankDistalAnat)
                 RightMidfootAnglesRad = math.EulerAngles_YXZ(RightEForefootAnat, RightEHindfootAnat)
+                RightMidfootAnglesROTRad = math.EulerAngles_ZXY(RightEForefootAnat, RightEHindfootAnat)
                 RightToesAnglesRad = math.EulerAngles_YXZ(RightEHalluxAnat, RightEForefootAnat)    
                 if not RightHalluxMarker[2] == 0: # if Hallux marker missing, set ToeAngles to zero
                     RightToesAnglesRad = math.EulerAngles_YXZ(RightEHalluxAnat, RightEForefootAnat)    
@@ -1073,6 +1101,7 @@ class Dynamic_Main():
                 LeftHalluxAnglesRelHFProgressionDeg   = T2.dot(LeftHalluxAnglesRelHFProgressionRad) * 180 / np.pi 
                 LeftAnkleComplexAnglesDeg = T2.dot(LeftAnkleComplexAnglesRad) * 180 / np.pi 
                 LeftMidfootAnglesDeg = T2.dot(LeftMidfootAnglesRad) * 180 / np.pi 
+                LeftMidfootAnglesROTDeg = T2.dot(LeftMidfootAnglesROTRad) * 180 / np.pi 
                 LeftToesAnglesDeg = T2.dot(LeftToesAnglesRad) * 180 / np.pi 
             
             # Store Angles in radians without changing sign based on side and plotting convention
@@ -1117,6 +1146,7 @@ class Dynamic_Main():
                 RightHalluxAnglesRelHFProgressionDeg   = T2.dot(RightHalluxAnglesRelHFProgressionRad) * 180 / np.pi 
                 RightAnkleComplexAnglesDeg = T2.dot(RightAnkleComplexAnglesRad) * 180 / np.pi 
                 RightMidfootAnglesDeg = T2.dot(RightMidfootAnglesRad) * 180 / np.pi 
+                RightMidfootAnglesROTDeg = T2.dot(RightMidfootAnglesROTRad) * 180 / np.pi 
                 RightToesAnglesDeg = T2.dot(RightToesAnglesRad) * 180 / np.pi 
             
             
@@ -1700,12 +1730,19 @@ class Dynamic_Main():
                 arrayLeftMidfootAngles[1][FrameNumber] = LeftMidfootAnglesDeg[1]
                 arrayLeftMidfootAngles[2][FrameNumber] = LeftMidfootAnglesDeg[2]
                 
+                arrayLeftMidfootAnglesROT[0][FrameNumber] = LeftMidfootAnglesROTDeg[0]
+                arrayLeftMidfootAnglesROT[1][FrameNumber] = LeftMidfootAnglesROTDeg[1]
+                arrayLeftMidfootAnglesROT[2][FrameNumber] = LeftMidfootAnglesROTDeg[2]
+                
                 arrayLeftToesAngles[0][FrameNumber] = LeftToesAnglesDeg[0]
                 arrayLeftToesAngles[1][FrameNumber] = LeftToesAnglesDeg[1]
                 arrayLeftToesAngles[2][FrameNumber] = LeftToesAnglesDeg[2]
                 
                 arraySupination[0][FrameNumber] = np.cos(45*np.pi/180) * (LeftMidfootAnglesDeg[2] + LeftAnkleComplexAnglesDeg[0])
                 arraySkew[0][FrameNumber]       = np.cos(45*np.pi/180) * (LeftMidfootAnglesDeg[2] - LeftAnkleComplexAnglesDeg[0])
+                
+                arraySupinationROT[0][FrameNumber] = np.cos(45*np.pi/180) * (LeftMidfootAnglesROTDeg[2] + LeftAnkleComplexAnglesDeg[0])
+                arraySkewROT[0][FrameNumber]       = np.cos(45*np.pi/180) * (LeftMidfootAnglesROTDeg[2] - LeftAnkleComplexAnglesDeg[0])
             
             #Left Joint Angles in Radians
             arrayLeftHipAnglesRad[0][FrameNumber] = LeftHipAnglesRad[0]
@@ -1728,6 +1765,10 @@ class Dynamic_Main():
                 arrayLeftMidfootAnglesRad[0][FrameNumber] = LeftMidfootAnglesRad[0]
                 arrayLeftMidfootAnglesRad[1][FrameNumber] = LeftMidfootAnglesRad[1]
                 arrayLeftMidfootAnglesRad[2][FrameNumber] = LeftMidfootAnglesRad[2]
+                
+                arrayLeftMidfootAnglesROTRad[0][FrameNumber] = LeftMidfootAnglesROTRad[0]
+                arrayLeftMidfootAnglesROTRad[1][FrameNumber] = LeftMidfootAnglesROTRad[1]
+                arrayLeftMidfootAnglesROTRad[2][FrameNumber] = LeftMidfootAnglesROTRad[2]
                 
                 arrayLeftToesAnglesRad[0][FrameNumber] = LeftToesAnglesRad[0]
                 arrayLeftToesAnglesRad[1][FrameNumber] = LeftToesAnglesRad[1]
@@ -1764,12 +1805,20 @@ class Dynamic_Main():
                 arrayRightMidfootAngles[1][FrameNumber] = RightMidfootAnglesDeg[1]
                 arrayRightMidfootAngles[2][FrameNumber] = RightMidfootAnglesDeg[2]
                 
+                arrayRightMidfootAnglesROT[0][FrameNumber] = RightMidfootAnglesROTDeg[0]
+                arrayRightMidfootAnglesROT[1][FrameNumber] = RightMidfootAnglesROTDeg[1]
+                arrayRightMidfootAnglesROT[2][FrameNumber] = RightMidfootAnglesROTDeg[2]
+                
                 arrayRightToesAngles[0][FrameNumber] = RightToesAnglesDeg[0]
                 arrayRightToesAngles[1][FrameNumber] = RightToesAnglesDeg[1]
                 arrayRightToesAngles[2][FrameNumber] = RightToesAnglesDeg[2]
                 
                 arraySupination[1][FrameNumber] = np.cos(45*np.pi/180) * (RightMidfootAnglesDeg[2] + RightAnkleComplexAnglesDeg[0])
                 arraySkew[1][FrameNumber]       = np.cos(45*np.pi/180) * (RightMidfootAnglesDeg[2] - RightAnkleComplexAnglesDeg[0])
+                
+                arraySupinationROT[1][FrameNumber] = np.cos(45*np.pi/180) * (RightMidfootAnglesROTDeg[2] + RightAnkleComplexAnglesDeg[0])
+                arraySkewROT[1][FrameNumber]       = np.cos(45*np.pi/180) * (RightMidfootAnglesROTDeg[2] - RightAnkleComplexAnglesDeg[0])
+            
             
             #Right Joint Angles in Radians
             arrayRightHipAnglesRad[0][FrameNumber] = RightHipAnglesRad[0]
@@ -1792,6 +1841,10 @@ class Dynamic_Main():
                 arrayRightMidfootAnglesRad[0][FrameNumber] = RightMidfootAnglesRad[0]
                 arrayRightMidfootAnglesRad[1][FrameNumber] = RightMidfootAnglesRad[1]
                 arrayRightMidfootAnglesRad[2][FrameNumber] = RightMidfootAnglesRad[2]
+                
+                arrayRightMidfootAnglesROTRad[0][FrameNumber] = RightMidfootAnglesROTRad[0]
+                arrayRightMidfootAnglesROTRad[1][FrameNumber] = RightMidfootAnglesROTRad[1]
+                arrayRightMidfootAnglesROTRad[2][FrameNumber] = RightMidfootAnglesROTRad[2]
                 
                 arrayRightToesAnglesRad[0][FrameNumber] = RightToesAnglesRad[0]
                 arrayRightToesAnglesRad[1][FrameNumber] = RightToesAnglesRad[1]
@@ -1910,12 +1963,13 @@ class Dynamic_Main():
         AnglesTypes = ['Angle','Angle','Angle']
                 
         # Left Angles    
-        if not 'LTrunkAngles' in ModelOutputs:
-            vicon.CreateModelOutput( SubjectName, 'LTrunkAngles', 'Angles', XYZNames, AnglesTypes)
-        if not 'LTrunkAnglesTOR' in ModelOutputs:
-            vicon.CreateModelOutput( SubjectName, 'LTrunkAnglesTOR', 'Angles', XYZNames, AnglesTypes)
-        if not 'LTrunkAnglesROT' in ModelOutputs:
-            vicon.CreateModelOutput( SubjectName, 'LTrunkAnglesROT', 'Angles', XYZNames, AnglesTypes)
+        if TrunkFlag == 1:
+            if not 'LTrunkAngles' in ModelOutputs:
+                vicon.CreateModelOutput( SubjectName, 'LTrunkAngles', 'Angles', XYZNames, AnglesTypes)
+            if not 'LTrunkAnglesTOR' in ModelOutputs:
+                vicon.CreateModelOutput( SubjectName, 'LTrunkAnglesTOR', 'Angles', XYZNames, AnglesTypes)
+            if not 'LTrunkAnglesROT' in ModelOutputs:
+                vicon.CreateModelOutput( SubjectName, 'LTrunkAnglesROT', 'Angles', XYZNames, AnglesTypes)
         if not 'LPelvisAngles' in ModelOutputs:
             vicon.CreateModelOutput( SubjectName, 'LPelvisAngles', 'Angles', XYZNames, AnglesTypes)
         if not 'LPelvisAnglesTOR' in ModelOutputs:
@@ -1949,6 +2003,8 @@ class Dynamic_Main():
                 vicon.CreateModelOutput( SubjectName, 'LANKA', 'Angles', XYZNames, AnglesTypes)
             if not 'LMDFA' in ModelOutputs:
                 vicon.CreateModelOutput( SubjectName, 'LMDFA', 'Angles', XYZNames, AnglesTypes)
+            if not 'LMDFA_ROT' in ModelOutputs:
+                vicon.CreateModelOutput( SubjectName, 'LMDFA_ROT', 'Angles', XYZNames, AnglesTypes)
             if not 'LHLXA' in ModelOutputs:
                 vicon.CreateModelOutput( SubjectName, 'LHLXA', 'Angles', XYZNames, AnglesTypes)
             # Create Modeled Marker- Upper calcaneus markers [name too long if Left_Upper_Posterior_Calcaneus]
@@ -1957,12 +2013,13 @@ class Dynamic_Main():
                     vicon.CreateModeledMarker( SubjectName, 'Left_Superior_Calcaneus' ) 
         
         # Right Angles
-        if not 'RTrunkAngles' in ModelOutputs:
-            vicon.CreateModelOutput( SubjectName, 'RTrunkAngles', 'Angles', XYZNames, AnglesTypes)
-        if not 'RTrunkAnglesTOR' in ModelOutputs:
-            vicon.CreateModelOutput( SubjectName, 'RTrunkAnglesTOR', 'Angles', XYZNames, AnglesTypes)
-        if not 'RTrunkAnglesROT' in ModelOutputs:
-            vicon.CreateModelOutput( SubjectName, 'RTrunkAnglesROT', 'Angles', XYZNames, AnglesTypes)
+        if TrunkFlag == 1:
+            if not 'RTrunkAngles' in ModelOutputs:
+                vicon.CreateModelOutput( SubjectName, 'RTrunkAngles', 'Angles', XYZNames, AnglesTypes)
+            if not 'RTrunkAnglesTOR' in ModelOutputs:
+                vicon.CreateModelOutput( SubjectName, 'RTrunkAnglesTOR', 'Angles', XYZNames, AnglesTypes)
+            if not 'RTrunkAnglesROT' in ModelOutputs:
+                vicon.CreateModelOutput( SubjectName, 'RTrunkAnglesROT', 'Angles', XYZNames, AnglesTypes)
         if not 'RPelvisAngles' in ModelOutputs:
             vicon.CreateModelOutput( SubjectName, 'RPelvisAngles', 'Angles', XYZNames, AnglesTypes)
         if not 'RPelvisAnglesTOR' in ModelOutputs:
@@ -1996,6 +2053,8 @@ class Dynamic_Main():
                 vicon.CreateModelOutput( SubjectName, 'RANKA', 'Angles', XYZNames, AnglesTypes)
             if not 'RMDFA' in ModelOutputs:
                 vicon.CreateModelOutput( SubjectName, 'RMDFA', 'Angles', XYZNames, AnglesTypes)
+            if not 'RMDFA_ROT' in ModelOutputs:
+                vicon.CreateModelOutput( SubjectName, 'RMDFA_ROT', 'Angles', XYZNames, AnglesTypes)
             if not 'RHLXA' in ModelOutputs:
                 vicon.CreateModelOutput( SubjectName, 'RHLXA', 'Angles', XYZNames, AnglesTypes)
             # Create Modeled Marker- Upper calcaneus markers [name too long if Right_Upper_Posterior_Calcaneus]
@@ -2006,8 +2065,12 @@ class Dynamic_Main():
         if self.valueLeftFootModelCheck == '1' or self.valueRightFootModelCheck == '1':
             if not 'Supination' in ModelOutputs:
                 vicon.CreateModelOutput( SubjectName, 'Supination', 'Angles', XYZNames, AnglesTypes)
+            if not 'SupinationROT' in ModelOutputs:
+                vicon.CreateModelOutput( SubjectName, 'SupinationROT', 'Angles', XYZNames, AnglesTypes)
             if not 'Skew' in ModelOutputs:
                 vicon.CreateModelOutput( SubjectName, 'Skew', 'Angles', XYZNames, AnglesTypes)
+            if not 'SkewROT' in ModelOutputs:
+                vicon.CreateModelOutput( SubjectName, 'SkewROT', 'Angles', XYZNames, AnglesTypes)
         
         # Additional Trunk Angles for MAPS
         if not 'LThoraxAngles' in ModelOutputs:
@@ -2094,6 +2157,7 @@ class Dynamic_Main():
             ReArranged_arrayLeftHalluxAngles = reArrangeArray(arrayLeftHalluxAngles)
             ReArranged_arrayLeftAnkleComplexAngles = reArrangeArray(arrayLeftAnkleComplexAngles)
             ReArranged_arrayLeftMidfootAngles = reArrangeArray(arrayLeftMidfootAngles)
+            ReArranged_arrayLeftMidfootAnglesROT = reArrangeArray(arrayLeftMidfootAnglesROT)
             ReArranged_arrayLeftToesAngles = reArrangeArray(arrayLeftToesAngles)
         ReArranged_arrayRightTrunkAngles = reArrangeArray(arrayRightTrunkAngles)
         ReArranged_arrayRightTrunkAnglesTOR = reArrangeArray(arrayRightTrunkAnglesTOR)
@@ -2115,6 +2179,7 @@ class Dynamic_Main():
             ReArranged_arrayRightHalluxAngles = reArrangeArray(arrayRightHalluxAngles)
             ReArranged_arrayRightAnkleComplexAngles = reArrangeArray(arrayRightAnkleComplexAngles)
             ReArranged_arrayRightMidfootAngles = reArrangeArray(arrayRightMidfootAngles)
+            ReArranged_arrayRightMidfootAnglesROT = reArrangeArray(arrayRightMidfootAnglesROT)
             ReArranged_arrayRightToesAngles = reArrangeArray(arrayRightToesAngles)
         
         # Write Arrays to C3D Files
@@ -2142,9 +2207,10 @@ class Dynamic_Main():
             vicon.SetModelOutput(SubjectName, 'Right_Superior_Calcaneus', arrayRightUpperPCAL, exists)
         
         # Left Angles   
-        vicon.SetModelOutput(SubjectName, 'LTrunkAngles',    ReArranged_arrayLeftTrunkAngles,   exists)
-        vicon.SetModelOutput(SubjectName, 'LTrunkAnglesTOR',    ReArranged_arrayLeftTrunkAnglesTOR,   exists)
-        vicon.SetModelOutput(SubjectName, 'LTrunkAnglesROT',    ReArranged_arrayLeftTrunkAnglesROT,   exists)
+        if TrunkFlag == 1:
+            vicon.SetModelOutput(SubjectName, 'LTrunkAngles',    ReArranged_arrayLeftTrunkAngles,   exists)
+            vicon.SetModelOutput(SubjectName, 'LTrunkAnglesTOR',    ReArranged_arrayLeftTrunkAnglesTOR,   exists)
+            vicon.SetModelOutput(SubjectName, 'LTrunkAnglesROT',    ReArranged_arrayLeftTrunkAnglesROT,   exists)
         vicon.SetModelOutput(SubjectName, 'LPelvisAngles',   ReArranged_arrayLeftPelvisAngles,  exists)
         vicon.SetModelOutput(SubjectName, 'LPelvisAnglesTOR',   ReArranged_arrayLeftPelvisAnglesTOR,  exists)
         vicon.SetModelOutput(SubjectName, 'LPelvisAnglesROT',   ReArranged_arrayLeftPelvisAnglesROT,  exists)
@@ -2162,12 +2228,14 @@ class Dynamic_Main():
             vicon.SetModelOutput(SubjectName, 'LHXGA',     ReArranged_arrayLeftHalluxAngles,      exists)
             vicon.SetModelOutput(SubjectName, 'LANKA',     ReArranged_arrayLeftAnkleComplexAngles,   exists)
             vicon.SetModelOutput(SubjectName, 'LMDFA',     ReArranged_arrayLeftMidfootAngles,   exists)
+            vicon.SetModelOutput(SubjectName, 'LMDFA_ROT',     ReArranged_arrayLeftMidfootAnglesROT,   exists)
             vicon.SetModelOutput(SubjectName, 'LHLXA',     ReArranged_arrayLeftToesAngles,   exists)
 
         # Right Angles
-        vicon.SetModelOutput(SubjectName, 'RTrunkAngles',    ReArranged_arrayRightTrunkAngles,   exists)
-        vicon.SetModelOutput(SubjectName, 'RTrunkAnglesTOR',    ReArranged_arrayRightTrunkAnglesTOR,   exists)
-        vicon.SetModelOutput(SubjectName, 'RTrunkAnglesROT',    ReArranged_arrayRightTrunkAnglesROT,   exists)
+        if TrunkFlag == 1:
+            vicon.SetModelOutput(SubjectName, 'RTrunkAngles',    ReArranged_arrayRightTrunkAngles,   exists)
+            vicon.SetModelOutput(SubjectName, 'RTrunkAnglesTOR',    ReArranged_arrayRightTrunkAnglesTOR,   exists)
+            vicon.SetModelOutput(SubjectName, 'RTrunkAnglesROT',    ReArranged_arrayRightTrunkAnglesROT,   exists)
         vicon.SetModelOutput(SubjectName, 'RPelvisAngles',   ReArranged_arrayRightPelvisAngles,  exists)
         vicon.SetModelOutput(SubjectName, 'RPelvisAnglesTOR',   ReArranged_arrayRightPelvisAnglesTOR,  exists)
         vicon.SetModelOutput(SubjectName, 'RPelvisAnglesROT',   ReArranged_arrayRightPelvisAnglesROT,  exists)
@@ -2185,11 +2253,14 @@ class Dynamic_Main():
             vicon.SetModelOutput(SubjectName, 'RHXGA',     ReArranged_arrayRightHalluxAngles,      exists)
             vicon.SetModelOutput(SubjectName, 'RANKA',     ReArranged_arrayRightAnkleComplexAngles,   exists)
             vicon.SetModelOutput(SubjectName, 'RMDFA',     ReArranged_arrayRightMidfootAngles,   exists)
+            vicon.SetModelOutput(SubjectName, 'RMDFA_ROT',     ReArranged_arrayRightMidfootAnglesROT,   exists)
             vicon.SetModelOutput(SubjectName, 'RHLXA',     ReArranged_arrayRightToesAngles,   exists)
     
         if self.valueLeftFootModelCheck == '1' or self.valueRightFootModelCheck == '1':
             vicon.SetModelOutput(SubjectName, 'Supination',     arraySupination,    exists)
             vicon.SetModelOutput(SubjectName, 'Skew',     arraySkew,    exists)
+            vicon.SetModelOutput(SubjectName, 'SupinationROT',     arraySupinationROT,    exists)
+            vicon.SetModelOutput(SubjectName, 'SkewROT',     arraySkewROT,    exists)
         
         # Additional Trunk Angles for MAPS
         vicon.SetModelOutput(SubjectName, 'LThoraxAngles',    ReArranged_arrayLeftTrunkAngles,   exists)
@@ -2245,25 +2316,18 @@ class Dynamic_Main():
         # =============================================================================
                   
         # Check for Force Plate Hits
-        LeftForcePlate_DeviceID = 0 #Default Value if Force Plate Hit is not Found
-        RightForcePlate_DeviceID = 0 #Default Value if Force Plate Hit is not Found
+        LeftForcePlate_DeviceIDs = [] #Default Value if Force Plate Hit is not Found
+        RightForcePlate_DeviceIDs = [] #Default Value if Force Plate Hit is not Found
                 
         DeviceIDs = vicon.GetDeviceIDs()
         for DeviceID in DeviceIDs:
             [name, type, rate, deviceOutputIDs, forceplate, eyetracker] = vicon.GetDeviceDetails(DeviceID)
             #print forceplate.Context
             if forceplate.Context == 'Left':
-                LeftForcePlate_DeviceID = DeviceID
-                Left_forceplate = forceplate
-                #print('Left',string.split(DeviceNames[i])[0])
+                LeftForcePlate_DeviceIDs.append(DeviceID)
             if forceplate.Context == 'Right':
-                RightForcePlate_DeviceID = DeviceID
-                Right_forceplate = forceplate
-                #print('Right',string.split(DeviceNames[i])[0])
-        
-        #print LeftForcePlate_DeviceID, RightForcePlate_DeviceID
-        
-        
+                RightForcePlate_DeviceIDs.append(DeviceID)
+
         # =============================================================================
         #         # Compute Kinematic Derivatives
         # =============================================================================
@@ -2273,7 +2337,7 @@ class Dynamic_Main():
         Order = 3
         WindowWidth = 21 # Use Odd Number 
         
-        if not LeftForcePlate_DeviceID == 0:
+        if not LeftForcePlate_DeviceIDs == []:
             #==================== Smooth Data before Differentiating ======================
             # Center of Mass
             arrayHATCenterOfMass = math.Smooth3DArray(arrayHATCenterOfMass, StartFrame, EndFrame, Order, WindowWidth)
@@ -2324,29 +2388,47 @@ class Dynamic_Main():
             [arrayVelocity , arrayAcceleration] = math.Differentiate(arrayLeftAnkleAnglesRad, StartFrame, EndFrame, framecount, DeltaTime)
             [arrayLeftAnkleAnglesVelocityShank , arrayLeftAnkleAnglesAccelerationShank] = math.AngVelAcc_Euler_YXZ(arrayLeftAnkleAnglesRad, arrayVelocity, arrayAcceleration, StartFrame, EndFrame, framecount)
             
+            # Initialize force plates array to append all force plates data
+            arraysFx = []
+            arraysFy = []
+            arraysFz = []
+            
+            arraysMx = []
+            arraysMy = []
+            arraysMz = []
+            
+            arraysCOPx = []
+            arraysCOPy = []
+            arraysCOPz = []
+            
             # Extract Force Plate Data
             # GetDeviceChannelGlobal(DeviceID, DeviceOutputID, ChannelID)
             # DeviceOutputID: Force = 1, Moment =2, COP =3
             # ChannelID: X =1, Y=2, Z=3
+            for DeviceID in LeftForcePlate_DeviceIDs:
+                # Force Plate data in Global coordinate system
+                # This is the force from body to force plate going into the ground 
+                [arrayFP_Fx, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 1, 1)
+                [arrayFP_Fy, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 1, 2)
+                [arrayFP_Fz, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 1, 3)
+                arraysFx.append(arrayFP_Fx)
+                arraysFy.append(arrayFP_Fy)
+                arraysFz.append(arrayFP_Fz)
+                
+                [arrayFP_Mx, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 2, 1)
+                [arrayFP_My, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 2, 2)
+                [arrayFP_Mz, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 2, 3)
+                arraysMx.append(arrayFP_Mx)
+                arraysMy.append(arrayFP_My)
+                arraysMz.append(arrayFP_Mz)
             
-            DeviceID = LeftForcePlate_DeviceID
-            FP_Origin = Left_forceplate.LocalT # Local Origin- Usually zero
-            FP_Center = Left_forceplate.WorldT # Force Plate Center
-            
-            # Force Plate data in Global coordinate system
-            # This is the force from body to force plate going into the ground 
-            [arrayFx, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 1, 1)
-            [arrayFy, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 1, 2)
-            [arrayFz, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 1, 3)
-            
-            [arrayMx, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 2, 1)
-            [arrayMy, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 2, 2)
-            [arrayMz, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 2, 3)
-            
-            [arrayCOPx, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 3, 1)
-            [arrayCOPy, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 3, 2)
-            [arrayCOPz, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 3, 3)
-            
+                [arrayFP_COPx, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 3, 1)
+                [arrayFP_COPy, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 3, 2)
+                [arrayFP_COPz, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 3, 3)
+                arraysCOPx.append(arrayFP_COPx)
+                arraysCOPy.append(arrayFP_COPy)
+                arraysCOPz.append(arrayFP_COPz)
+                
             GRF = np.array([0.,0.,0.]) # Ground Reaction Force
             GRT = np.array([0.,0.,0.]) # Ground Reaction Torque
             COP = np.array([0.,0.,0.]) # Center of Pressure
@@ -2399,25 +2481,7 @@ class Dynamic_Main():
                 LeftThighMassMomentOfInertia = ThighMass * np.square(LeftThighRadiusOfGyration)
                 LeftShankMassMomentOfInertia = ShankMass * np.square(LeftShankRadiusOfGyration)
                 LeftFootMassMomentOfInertia = FootMass * np.square(LeftFootRadiusOfGyration)
-                 
-                
-                FP_FrameNumber = int(FrameNumber * FP_FrameRate / MarkerFrameRate)
-                
-                # Compute Vertical Torque (Mz is dependent on COP location)
-                Tz = arrayMz[FP_FrameNumber] + arrayFx[FP_FrameNumber] * (arrayCOPy[FP_FrameNumber] - FP_Center[1] + FP_Origin[1]) - arrayFy[FP_FrameNumber] * (arrayCOPx[FP_FrameNumber] -FP_Center[0] + FP_Origin[0])
-                
-                # Account for Walking Direction
-                # Compute Reaction force as opposite of force plate output
-                GRF[0] = -Direction * arrayFx[FP_FrameNumber]
-                GRF[1] = -Direction * arrayFy[FP_FrameNumber]
-                GRF[2] = -arrayFz[FP_FrameNumber]
-                GRT[2] = -Tz / 1e3 # Convert from mm to meters
-
-                # Center of Pressure is already in lab/global coordinate system
-                COP[0] = Direction * arrayCOPx[FP_FrameNumber]
-                COP[1] = Direction * arrayCOPy[FP_FrameNumber]
-                COP[2] = 0
-                
+                    
                 ############ Compute Anatomical Coordinate Systems ###################
                 [EPelvisTech, MidASISLab] = gait.TechCS_Pelvis_Newington(LeftASISMarker, RightASISMarker, SacralMarker)
                 EPelvisAnat = math.TransformAnatCoorSysFromTechCoors(self.valueEPelvisAnatRelTech, EPelvisTech)
@@ -2440,27 +2504,7 @@ class Dynamic_Main():
                 except:
                     LeftEFootTibAnat = np.matrix([[0. for m in range(3)] for n in range(3)])
                 ####################################################################################################### 
-                
-                
-                # ============================== Ankle ====================================
-                # All Distances are in mm. Account for conversion to meters
-                LeftAnkleForceLab[0] = FootMass * Direction * arrayLeftFootLinearAccelerationLab[0][FrameNumber] /1e3 - GRF[0]
-                LeftAnkleForceLab[1] = FootMass * Direction * arrayLeftFootLinearAccelerationLab[1][FrameNumber] /1e3 - GRF[1]
-                LeftAnkleForceLab[2] = FootMass * arrayLeftFootLinearAccelerationLab[2][FrameNumber] /1e3 - GRF[2] + FootMass * 9.81
-            
                     
-                # vector from center of mass to proximal point of load application
-                ProximalVector = LeftAnkleCenterLab - LeftFootCenterOfMass
-                # vector from center of mass to distal point of load application
-                DistalVector = COP - LeftFootCenterOfMass 
-                
-                MomentFromProximalForce = np.cross(ProximalVector,LeftAnkleForceLab) / 1e3 # Convert from mm to meters
-                MomentFromDistalForce = np.cross(DistalVector,GRF) / 1e3 # Convert from mm to meters
-                
-                # Transform to Foot Coordinate System
-                MomentFromProximalForce_Foot = math.TransformVectorIntoMovingCoors(MomentFromProximalForce, LeftEFootAnat)
-                MomentfromDistalForce_Foot = math.TransformVectorIntoMovingCoors(MomentFromDistalForce, LeftEFootAnat)
-                GRT_Foot = math.TransformVectorIntoMovingCoors(GRT, LeftEFootAnat)
                 LeftFootAnglesVelocityLab = np.array([arrayLeftFootAnglesVelocityLab[0][FrameNumber],arrayLeftFootAnglesVelocityLab[1][FrameNumber],arrayLeftFootAnglesVelocityLab[2][FrameNumber]])
                 LeftFootAnglesAccelerationLab = np.array([arrayLeftFootAnglesAccelerationLab[0][FrameNumber],arrayLeftFootAnglesAccelerationLab[1][FrameNumber],arrayLeftFootAnglesAccelerationLab[2][FrameNumber]])
                 LeftAnkleAnglesVelocityShank = np.array([arrayLeftAnkleAnglesVelocityShank[0][FrameNumber],arrayLeftAnkleAnglesVelocityShank[1][FrameNumber],arrayLeftAnkleAnglesVelocityShank[2][FrameNumber]])
@@ -2472,17 +2516,110 @@ class Dynamic_Main():
                 if self.ShankCoordinateSystem == 'Proximal':
                     LeftAnkleAnglesVelocityLab = math.TransformVectorIntoLabCoors(LeftAnkleAnglesVelocityShank, LeftEShankProximalAnat)
                 LeftAnkleAnglesVelocity_Foot = math.TransformVectorIntoMovingCoors(LeftAnkleAnglesVelocityLab, LeftEFootAnat)
+                    
+                FP_FrameNumber = int(FrameNumber * FP_FrameRate / MarkerFrameRate)
                 
-                LeftAnkleMoment_Foot[0] = LeftFootMassMomentOfInertia[0] * LeftFootAnglesAcceleration_Foot[0] + \
-                                        (LeftFootMassMomentOfInertia[2] - LeftFootMassMomentOfInertia[1]) * LeftFootAnglesVelocity_Foot[1] * LeftFootAnglesVelocity_Foot[2] \
-                                            - MomentFromProximalForce_Foot[0] - MomentfromDistalForce_Foot[0] - GRT_Foot[0]
-                LeftAnkleMoment_Foot[1] = LeftFootMassMomentOfInertia[1] * LeftFootAnglesAcceleration_Foot[1] + \
-                                        (LeftFootMassMomentOfInertia[0] - LeftFootMassMomentOfInertia[2]) * LeftFootAnglesVelocity_Foot[2] * LeftFootAnglesVelocity_Foot[0] \
-                                            - MomentFromProximalForce_Foot[1] - MomentfromDistalForce_Foot[1] - GRT_Foot[1]
-                LeftAnkleMoment_Foot[2] = LeftFootMassMomentOfInertia[2] * LeftFootAnglesAcceleration_Foot[2] + \
-                                        (LeftFootMassMomentOfInertia[1] - LeftFootMassMomentOfInertia[0]) * LeftFootAnglesVelocity_Foot[0] * LeftFootAnglesVelocity_Foot[1] \
-                                            - MomentFromProximalForce_Foot[2] - MomentfromDistalForce_Foot[2] - GRT_Foot[2]
-                
+                # ============================== Ankle ====================================
+                # Calculate ankle moment from each force plate with Left context
+                for LeftForcePlateIndex in range(len(LeftForcePlate_DeviceIDs)):
+                    DeviceID = LeftForcePlate_DeviceIDs[LeftForcePlateIndex]
+                    
+                    # print('Computing Kinetics: ',FrameNumber, DeviceID)
+                    [name, type, rate, deviceOutputIDs, forceplate, eyetracker] = vicon.GetDeviceDetails(DeviceID)
+                    Left_forceplate = forceplate
+                    FP_Origin = Left_forceplate.LocalT # Local Origin- Usually zero
+                    FP_Center = Left_forceplate.WorldT # Force Plate Center
+                    
+                    # Compute Vertical Torque (Mz is dependent on COP location)
+                    Tz = arraysMz[LeftForcePlateIndex][FP_FrameNumber] + arraysFx[LeftForcePlateIndex][FP_FrameNumber] * (arraysCOPy[LeftForcePlateIndex][FP_FrameNumber] 
+                         - FP_Center[1] + FP_Origin[1]) - arraysFy[LeftForcePlateIndex][FP_FrameNumber] * (arraysCOPx[LeftForcePlateIndex][FP_FrameNumber] -FP_Center[0] + FP_Origin[0])
+                    
+                    # Account for Walking Direction
+                    # Compute Reaction force as opposite of force plate output
+                    GRF[0] = -Direction * arraysFx[LeftForcePlateIndex][FP_FrameNumber]
+                    GRF[1] = -Direction * arraysFy[LeftForcePlateIndex][FP_FrameNumber]
+                    GRF[2] = -arraysFz[LeftForcePlateIndex][FP_FrameNumber]
+                    GRT[2] = -Tz / 1e3 # Convert from mm to meters
+    
+                    # Center of Pressure is already in lab/global coordinate system
+                    COP[0] = Direction * arraysCOPx[LeftForcePlateIndex][FP_FrameNumber]
+                    COP[1] = Direction * arraysCOPy[LeftForcePlateIndex][FP_FrameNumber]
+                    COP[2] = 0
+                    
+                    ################################################## Start: SLC Additions ######################################################
+                    # Correct for Lab CS
+                    GRF_Lab = math.TransformVectorIntoMovingCoors(GRF, ELab)
+                    # Write back to GRM, account for side for ML, and scale to BW
+                    arrayLeftGRF[0][FrameNumber] += GRF_Lab[0] / float(self.valueBodyMass)
+                    arrayLeftGRF[1][FrameNumber] += Sign * GRF_Lab[1] / float(self.valueBodyMass)
+                    arrayLeftGRF[2][FrameNumber] += GRF_Lab[2] / float(self.valueBodyMass)
+                    
+                    arrayLeftGRM[0][FrameNumber] += arraysCOPx[LeftForcePlateIndex][FP_FrameNumber] - arrayPelvisOrigin[0][FrameNumber]
+                    arrayLeftGRM[1][FrameNumber] += arraysCOPy[LeftForcePlateIndex][FP_FrameNumber] - arrayPelvisOrigin[1][FrameNumber]
+                    arrayLeftGRM[2][FrameNumber] += Sign * GRT[2] / float(self.valueBodyMass)
+                    
+                    # Store in array of one frame
+                    COP_Pelvis = np.array([arrayLeftGRM[0][FrameNumber], arrayLeftGRM[1][FrameNumber], arrayLeftGRM[2][FrameNumber]])
+                    # Correct for Lab CS
+                    COP_Pelvis_Lab = math.TransformVectorIntoMovingCoors(COP_Pelvis, ELab)
+                    # Write back to GRM, account for walk direction and side for ML, and scale to % leg length
+                    arrayLeftGRM[0][FrameNumber] = 100 * Direction * COP_Pelvis_Lab[0] / self.valueLeftLegLength
+                    arrayLeftGRM[1][FrameNumber] = 100 * Direction * Sign * COP_Pelvis_Lab[1] / self.valueLeftLegLength
+                    
+                    # Add Foot CoP, compute components first and foot length
+                    AnkleCOP = COP - LeftAnkleCenterLab
+                    AnkleCOP[2] = 0
+                    AnkleCOP_Foot = math.TransformVectorIntoMovingCoors(AnkleCOP, LeftEFootAnat)
+                    FL = np.linalg.norm(LeftToeMarker - LeftAnkleCenterLab)
+                    # Normalize
+                    AnkleCOP_Foot_Normalized = 100 * AnkleCOP_Foot / FL
+                    # Account for foot progression angle and account for walk direction and M/L
+                    if np.linalg.norm(GRF) >=ForcePlate_Threshold: # Add to COP computation if GRF is above threshold
+                        arrayLeftFootCoP[0][FrameNumber] += AnkleCOP_Foot_Normalized[0]
+                        arrayLeftFootCoP[1][FrameNumber] += AnkleCOP_Foot_Normalized[1]
+                        arrayLeftFootCoP[2][FrameNumber] = 0
+                    ################################################## End: SLC Additions ######################################################
+                    
+                    # All Distances are in mm. Account for conversion to meters
+                    if LeftForcePlateIndex == 0: #Add inertial component for first force plate
+                        LeftAnkleForceLab[0] = FootMass * Direction * arrayLeftFootLinearAccelerationLab[0][FrameNumber] /1e3
+                        LeftAnkleForceLab[1] = FootMass * Direction * arrayLeftFootLinearAccelerationLab[1][FrameNumber] /1e3
+                        LeftAnkleForceLab[2] = FootMass * arrayLeftFootLinearAccelerationLab[2][FrameNumber] /1e3 + FootMass * 9.81
+                    if np.linalg.norm(GRF) >= ForcePlate_Threshold: # For additional force plates, add GRF
+                        LeftAnkleForceLab[0] = LeftAnkleForceLab[0] - GRF[0]
+                        LeftAnkleForceLab[1] = LeftAnkleForceLab[1] - GRF[1]
+                        LeftAnkleForceLab[2] = LeftAnkleForceLab[2] - GRF[2]
+                    
+                    # vector from center of mass to proximal point of load application
+                    ProximalVector = LeftAnkleCenterLab - LeftFootCenterOfMass
+                    # vector from center of mass to distal point of load application
+                    DistalVector = COP - LeftFootCenterOfMass 
+                    
+                    MomentFromProximalForce = np.cross(ProximalVector,LeftAnkleForceLab) / 1e3 # Convert from mm to meters
+                    MomentFromDistalForce = np.cross(DistalVector,GRF) / 1e3 # Convert from mm to meters
+                    
+                    # Transform to Foot Coordinate System
+                    MomentFromProximalForce_Foot = math.TransformVectorIntoMovingCoors(MomentFromProximalForce, LeftEFootAnat)
+                    MomentfromDistalForce_Foot = math.TransformVectorIntoMovingCoors(MomentFromDistalForce, LeftEFootAnat)
+                    GRT_Foot = math.TransformVectorIntoMovingCoors(GRT, LeftEFootAnat)
+                    
+                    if LeftForcePlateIndex == 0: #Add inertial component for first force plate
+                        LeftAnkleMoment_Foot[0] = LeftFootMassMomentOfInertia[0] * LeftFootAnglesAcceleration_Foot[0] + \
+                                                (LeftFootMassMomentOfInertia[2] - LeftFootMassMomentOfInertia[1]) * LeftFootAnglesVelocity_Foot[1] * LeftFootAnglesVelocity_Foot[2] \
+                                                    
+                                                    
+                        LeftAnkleMoment_Foot[1] = LeftFootMassMomentOfInertia[1] * LeftFootAnglesAcceleration_Foot[1] + \
+                                                (LeftFootMassMomentOfInertia[0] - LeftFootMassMomentOfInertia[2]) * LeftFootAnglesVelocity_Foot[2] * LeftFootAnglesVelocity_Foot[0] \
+                                                    
+                                                    
+                        LeftAnkleMoment_Foot[2] = LeftFootMassMomentOfInertia[2] * LeftFootAnglesAcceleration_Foot[2] + \
+                                                (LeftFootMassMomentOfInertia[1] - LeftFootMassMomentOfInertia[0]) * LeftFootAnglesVelocity_Foot[0] * LeftFootAnglesVelocity_Foot[1] \
+                                                    
+                    if np.linalg.norm(GRF) >= ForcePlate_Threshold: # For additional force plates, add Moment due to GRF
+                        LeftAnkleMoment_Foot[0] = LeftAnkleMoment_Foot[0] - MomentFromProximalForce_Foot[0] - MomentfromDistalForce_Foot[0] - GRT_Foot[0]
+                        LeftAnkleMoment_Foot[1] = LeftAnkleMoment_Foot[1] - MomentFromProximalForce_Foot[1] - MomentfromDistalForce_Foot[1] - GRT_Foot[1]
+                        LeftAnkleMoment_Foot[2] = LeftAnkleMoment_Foot[2] - MomentFromProximalForce_Foot[2] - MomentfromDistalForce_Foot[2] - GRT_Foot[2]
+                    
                 # Transform Ankle Moment to Lab coordinate system
                 LeftAnkleMomentLab = math.TransformVectorIntoLabCoors(LeftAnkleMoment_Foot,LeftEFootAnat)
                 
@@ -2521,7 +2658,7 @@ class Dynamic_Main():
                 # All Distances are in mm. Account for conversion to meters
                 LeftKneeForceLab[0] = ShankMass * Direction * arrayLeftShankLinearAccelerationLab[0][FrameNumber] /1e3 - LeftAnkleForceLab[0]
                 LeftKneeForceLab[1] = ShankMass * Direction * arrayLeftShankLinearAccelerationLab[1][FrameNumber] /1e3 - LeftAnkleForceLab[1]
-                LeftKneeForceLab[2] = ShankMass * arrayLeftShankLinearAccelerationLab[2][FrameNumber] /1e3 - LeftAnkleForceLab[2] + FootMass * 9.81
+                LeftKneeForceLab[2] = ShankMass * arrayLeftShankLinearAccelerationLab[2][FrameNumber] /1e3 - LeftAnkleForceLab[2] + ShankMass * 9.81
                 
 
                 # vector from center of mass to proximal point of load application
@@ -2609,7 +2746,7 @@ class Dynamic_Main():
                 # All Distances are in mm. Account for conversion to meters
                 LeftHipForceLab[0] = ThighMass * Direction * arrayLeftThighLinearAccelerationLab[0][FrameNumber] /1e3 - LeftKneeForceLab[0]
                 LeftHipForceLab[1] = ThighMass * Direction * arrayLeftThighLinearAccelerationLab[1][FrameNumber] /1e3 - LeftKneeForceLab[1]
-                LeftHipForceLab[2] = ThighMass * arrayLeftThighLinearAccelerationLab[2][FrameNumber] /1e3 - LeftKneeForceLab[2] + FootMass * 9.81
+                LeftHipForceLab[2] = ThighMass * arrayLeftThighLinearAccelerationLab[2][FrameNumber] /1e3 - LeftKneeForceLab[2] + ThighMass * 9.81
                 
 
                 # vector from center of mass to proximal point of load application
@@ -2672,25 +2809,7 @@ class Dynamic_Main():
                 arrayLeftHipJRF[0][FrameNumber] = LeftHipForceThigh[0] / float(self.valueBodyMass)
                 arrayLeftHipJRF[1][FrameNumber] = Sign * LeftHipForceThigh[1] / float(self.valueBodyMass)
                 arrayLeftHipJRF[2][FrameNumber] = LeftHipForceThigh[2] / float(self.valueBodyMass)
-                # Correct for Lab CS
-                GRF = math.TransformVectorIntoMovingCoors(GRF, ELab)
-                # Write back to GRM, account for side for ML, and scale to BW
-                arrayLeftGRF[0][FrameNumber] = GRF[0] / float(self.valueBodyMass)
-                arrayLeftGRF[1][FrameNumber] = Sign * GRF[1] / float(self.valueBodyMass)
-                arrayLeftGRF[2][FrameNumber] = GRF[2] / float(self.valueBodyMass)
                 
-                arrayLeftGRM[0][FrameNumber] = arrayCOPx[FP_FrameNumber] - arrayPelvisOrigin[0][FrameNumber]
-                arrayLeftGRM[1][FrameNumber] = arrayCOPy[FP_FrameNumber] - arrayPelvisOrigin[1][FrameNumber]
-                arrayLeftGRM[2][FrameNumber] = Sign * GRT[2] / float(self.valueBodyMass)
-                
-                # Store in array of one frame
-                COP_Pelvis = np.array([arrayLeftGRM[0][FrameNumber], arrayLeftGRM[1][FrameNumber], arrayLeftGRM[2][FrameNumber]])
-                # Correct for Lab CS
-                COP_Pelvis = math.TransformVectorIntoMovingCoors(COP_Pelvis, ELab)
-                # Write back to GRM, account for walk direction and side for ML, and scale to % leg length
-                arrayLeftGRM[0][FrameNumber] = 100 * Direction * COP_Pelvis[0] / self.valueLeftLegLength
-                arrayLeftGRM[1][FrameNumber] = 100 * Direction * Sign * COP_Pelvis[1] / self.valueLeftLegLength
-
                 # Add Moment and Power Sums
                 # Index 0 is sum of sagittal plane moment, Index 1 is sum of sagittal power, Index3 is sum of total power
                 arrayLeftMPSum[0][FrameNumber] = arrayLeftHipMoment[0][FrameNumber] + \
@@ -2702,22 +2821,8 @@ class Dynamic_Main():
                 arrayLeftMPSum[2][FrameNumber] = arrayLeftHipPowerTotal[2][FrameNumber] + \
                                                  arrayLeftKneePowerTotal[2][FrameNumber] + \
                                                  arrayLeftAnklePowerTotal[2][FrameNumber]
-                
-                # Add Foot CoP, compute components first and foot length
-                AnkleCOP = COP - LeftAnkleCenterLab
-                AnkleCOP[2] = 0
-                AnkleCOP_Foot = math.TransformVectorIntoMovingCoors(AnkleCOP, LeftEFootAnat)
-                FL = np.linalg.norm(LeftToeMarker - LeftAnkleCenterLab)
-                # Normalize
-                AnkleCOP_Foot_Normalized = 100 * AnkleCOP_Foot / FL
-                # Account for foot progression angle and account for walk direction and M/L
-                arrayLeftFootCoP[0][FrameNumber] = AnkleCOP_Foot_Normalized[0]
-                arrayLeftFootCoP[1][FrameNumber] = AnkleCOP_Foot_Normalized[1]
-                arrayLeftFootCoP[2][FrameNumber] = 0
-            
-            
-            
-        if not RightForcePlate_DeviceID == 0:
+  
+        if not RightForcePlate_DeviceIDs == []:
             #==================== Smooth Data before Differentiating ======================
             # Center of Mass
             arrayHATCenterOfMass = math.Smooth3DArray(arrayHATCenterOfMass, StartFrame, EndFrame, Order, WindowWidth)
@@ -2767,30 +2872,50 @@ class Dynamic_Main():
             [arrayRightKneeAnglesVelocityThigh , arrayRightKneeAnglesAccelerationThigh] = math.AngVelAcc_Euler_YXZ(arrayRightKneeAnglesRad, arrayVelocity, arrayAcceleration, StartFrame, EndFrame, framecount)
             [arrayVelocity , arrayAcceleration] = math.Differentiate(arrayRightAnkleAnglesRad, StartFrame, EndFrame, framecount, DeltaTime)
             [arrayRightAnkleAnglesVelocityShank , arrayRightAnkleAnglesAccelerationShank] = math.AngVelAcc_Euler_YXZ(arrayRightAnkleAnglesRad, arrayVelocity, arrayAcceleration, StartFrame, EndFrame, framecount)
+
+            # Initialize force plates array to append all force plates data            
+            arraysFx = []
+            arraysFy = []
+            arraysFz = []
+            
+            arraysMx = []
+            arraysMy = []
+            arraysMz = []
+            
+            arraysCOPx = []
+            arraysCOPy = []
+            arraysCOPz = []
             
             # Extract Force Plate Data
             # GetDeviceChannelGlobal(DeviceID, DeviceOutputID, ChannelID)
             # DeviceOutputID: Force = 1, Moment = 2, COP = 3
             # ChannelID: X =1, Y=2, Z=3
-            
-            DeviceID = RightForcePlate_DeviceID
-            FP_Origin = Right_forceplate.LocalT # Local Origin- Usually zero
-            FP_Center = Right_forceplate.WorldT # Force Plate Center
-            
-            # Force Plate data in Global coordinate system
-            # This is the force from body to force plate going into the ground 
-            [arrayFx, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 1, 1)
-            [arrayFy, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 1, 2)
-            [arrayFz, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 1, 3)
-            
-            [arrayMx, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 2, 1)
-            [arrayMy, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 2, 2)
-            [arrayMz, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 2, 3)
-            
-            [arrayCOPx, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 3, 1)
-            [arrayCOPy, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 3, 2)
-            [arrayCOPz, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 3, 3)
-            
+            for DeviceID in RightForcePlate_DeviceIDs:
+                # Force Plate data in Global coordinate system
+                # This is the force from body to force plate going into the ground 
+                [arrayFx, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 1, 1)
+                [arrayFy, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 1, 2)
+                [arrayFz, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 1, 3)
+                arraysFx.append(arrayFx)
+                arraysFy.append(arrayFy)
+                arraysFz.append(arrayFz)
+
+                
+                [arrayMx, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 2, 1)
+                [arrayMy, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 2, 2)
+                [arrayMz, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 2, 3)
+                arraysMx.append(arrayMx)
+                arraysMy.append(arrayMy)
+                arraysMz.append(arrayMz)
+
+                
+                [arrayCOPx, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 3, 1)
+                [arrayCOPy, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 3, 2)
+                [arrayCOPz, Ready, FP_FrameRate] = vicon.GetDeviceChannelGlobal(DeviceID, 3, 3)
+                arraysCOPx.append(arrayCOPx)
+                arraysCOPy.append(arrayCOPy)
+                arraysCOPz.append(arrayCOPz)
+                
             GRF = np.array([0.,0.,0.]) # Ground Reaction Force
             GRT = np.array([0.,0.,0.]) # Ground Reaction Torque
             COP = np.array([0.,0.,0.]) # Center of Pressure
@@ -2835,25 +2960,6 @@ class Dynamic_Main():
                 RightThighMassMomentOfInertia = ThighMass * np.square(RightThighRadiusOfGyration)
                 RightShankMassMomentOfInertia = ShankMass * np.square(RightShankRadiusOfGyration)
                 RightFootMassMomentOfInertia = FootMass * np.square(RightFootRadiusOfGyration)
-                 
-                
-                FP_FrameNumber = int(FrameNumber * FP_FrameRate / MarkerFrameRate)
-                
-                # Compute Vertical Torque (Mz is dependent on COP location)
-                Tz = arrayMz[FP_FrameNumber] + arrayFx[FP_FrameNumber] * (arrayCOPy[FP_FrameNumber] - FP_Center[1] + FP_Origin[1]) - arrayFy[FP_FrameNumber] * (arrayCOPx[FP_FrameNumber] -FP_Center[0] + FP_Origin[0])
-                
-                # Account for Walking Direction
-                # Compute Reaction force as opposite of force plate output
-                GRF[0] = -Direction * arrayFx[FP_FrameNumber]
-                GRF[1] = -Direction * arrayFy[FP_FrameNumber]
-                GRF[2] = -arrayFz[FP_FrameNumber]
-                GRT[2] = -Tz / 1e3 # Convert from mm to meters
-                
-                # Center of Pressure is already in lab/global coordinate system
-                COP[0] = Direction * arrayCOPx[FP_FrameNumber]
-                COP[1] = Direction * arrayCOPy[FP_FrameNumber]
-                COP[2] = 0
-                
                 
                 ############ Compute Anatomilcal Coordinate Systems ###################
                 [EPelvisTech, MidASISLab] = gait.TechCS_Pelvis_Newington(LeftASISMarker, RightASISMarker, SacralMarker)
@@ -2878,26 +2984,6 @@ class Dynamic_Main():
                     RightEFootTibAnat = np.matrix([[0. for m in range(3)] for n in range(3)])
                 ####################################################################################################### 
                 
-                
-                # ============================== Ankle ====================================
-                # All Distances are in mm. Account for conversion to meters
-                RightAnkleForceLab[0] = FootMass * Direction * arrayRightFootLinearAccelerationLab[0][FrameNumber] /1e3 - GRF[0]
-                RightAnkleForceLab[1] = FootMass * Direction * arrayRightFootLinearAccelerationLab[1][FrameNumber] /1e3 - GRF[1]
-                RightAnkleForceLab[2] = FootMass * arrayRightFootLinearAccelerationLab[2][FrameNumber] /1e3 - GRF[2] + FootMass * 9.81
-            
-                    
-                # vector from center of mass to proximal point of load application
-                ProximalVector = RightAnkleCenterLab - RightFootCenterOfMass
-                # vector from center of mass to distal point of load application
-                DistalVector = COP - RightFootCenterOfMass 
-                
-                MomentFromProximalForce = np.cross(ProximalVector,RightAnkleForceLab) / 1e3 # Convert from mm to meters
-                MomentFromDistalForce = np.cross(DistalVector,GRF) / 1e3 # Convert from mm to meters
-                
-                # Tranform to Foot Coordinate System
-                MomentFromProximalForce_Foot = math.TransformVectorIntoMovingCoors(MomentFromProximalForce, RightEFootAnat)
-                MomentfromDistalForce_Foot = math.TransformVectorIntoMovingCoors(MomentFromDistalForce, RightEFootAnat)
-                GRT_Foot = math.TransformVectorIntoMovingCoors(GRT, RightEFootAnat)
                 RightFootAnglesVelocityLab = np.array([arrayRightFootAnglesVelocityLab[0][FrameNumber],arrayRightFootAnglesVelocityLab[1][FrameNumber],arrayRightFootAnglesVelocityLab[2][FrameNumber]])
                 RightFootAnglesAccelerationLab = np.array([arrayRightFootAnglesAccelerationLab[0][FrameNumber],arrayRightFootAnglesAccelerationLab[1][FrameNumber],arrayRightFootAnglesAccelerationLab[2][FrameNumber]])
                 RightAnkleAnglesVelocityShank = np.array([arrayRightAnkleAnglesVelocityShank[0][FrameNumber],arrayRightAnkleAnglesVelocityShank[1][FrameNumber],arrayRightAnkleAnglesVelocityShank[2][FrameNumber]])
@@ -2910,17 +2996,109 @@ class Dynamic_Main():
                     RightAnkleAnglesVelocityLab = math.TransformVectorIntoLabCoors(RightAnkleAnglesVelocityShank, RightEShankProximalAnat)
                 RightAnkleAnglesVelocity_Foot = math.TransformVectorIntoMovingCoors(RightAnkleAnglesVelocityLab, RightEFootAnat)
 
+                FP_FrameNumber = int(FrameNumber * FP_FrameRate / MarkerFrameRate)
                 
-                RightAnkleMoment_Foot[0] = RightFootMassMomentOfInertia[0] * RightFootAnglesAcceleration_Foot[0] + \
-                                        (RightFootMassMomentOfInertia[2] - RightFootMassMomentOfInertia[1]) * RightFootAnglesVelocity_Foot[1] * RightFootAnglesVelocity_Foot[2] \
-                                            - MomentFromProximalForce_Foot[0] - MomentfromDistalForce_Foot[0] - GRT_Foot[0]
-                RightAnkleMoment_Foot[1] = RightFootMassMomentOfInertia[1] * RightFootAnglesAcceleration_Foot[1] + \
-                                        (RightFootMassMomentOfInertia[0] - RightFootMassMomentOfInertia[2]) * RightFootAnglesVelocity_Foot[2] * RightFootAnglesVelocity_Foot[0] \
-                                            - MomentFromProximalForce_Foot[1] - MomentfromDistalForce_Foot[1] - GRT_Foot[1]
-                RightAnkleMoment_Foot[2] = RightFootMassMomentOfInertia[2] * RightFootAnglesAcceleration_Foot[2] + \
-                                        (RightFootMassMomentOfInertia[1] - RightFootMassMomentOfInertia[0]) * RightFootAnglesVelocity_Foot[0] * RightFootAnglesVelocity_Foot[1] \
-                                            - MomentFromProximalForce_Foot[2] - MomentfromDistalForce_Foot[2] - GRT_Foot[2]
                 
+                # ============================== Ankle ====================================
+                # Compute ankle moment from each force plate with Right context
+                for RightForcePlateIndex in range(len(RightForcePlate_DeviceIDs)):
+                    DeviceID = RightForcePlate_DeviceIDs[RightForcePlateIndex]
+                    [name, type, rate, deviceOutputIDs, forceplate, eyetracker] = vicon.GetDeviceDetails(DeviceID)
+                    Right_forceplate = forceplate
+                    FP_Origin = Right_forceplate.LocalT # Local Origin- Usually zero
+                    FP_Center = Right_forceplate.WorldT # Force Plate Center
+                # Compute Vertical Torque (Mz is dependent on COP location)
+                    Tz = arraysMz[RightForcePlateIndex][FP_FrameNumber] + arraysFx[RightForcePlateIndex][FP_FrameNumber] * (arraysCOPy[RightForcePlateIndex][FP_FrameNumber] \
+                        - FP_Center[1] + FP_Origin[1]) - arraysFy[RightForcePlateIndex][FP_FrameNumber] * (arraysCOPx[RightForcePlateIndex][FP_FrameNumber] -FP_Center[0] + FP_Origin[0])
+                    
+                    # Account for Walking Direction
+                    # Compute Reaction force as opposite of force plate output
+                    GRF[0] = -Direction * arraysFx[RightForcePlateIndex][FP_FrameNumber]
+                    GRF[1] = -Direction * arraysFy[RightForcePlateIndex][FP_FrameNumber]
+                    GRF[2] = -arraysFz[RightForcePlateIndex][FP_FrameNumber]
+                    GRT[2] = -Tz / 1e3 # Convert from mm to meters
+    
+                    # Center of Pressure is already in lab/global coordinate system
+                    COP[0] = Direction * arraysCOPx[RightForcePlateIndex][FP_FrameNumber]
+                    COP[1] = Direction * arraysCOPy[RightForcePlateIndex][FP_FrameNumber]
+                    COP[2] = 0
+                    
+                    ################################################## Start: SLC Additions ######################################################
+                    # Add Ground Reaction Forces and Moments: Flip X and Y if walking in -X
+                    # Correct for Lab CS
+                    GRF_Lab = math.TransformVectorIntoMovingCoors(GRF, ELab)
+                    # Write back to GRM, account for side for ML, and scale to BW
+                    arrayRightGRF[0][FrameNumber] += GRF_Lab[0] / float(self.valueBodyMass)
+                    arrayRightGRF[1][FrameNumber] += Sign * GRF_Lab[1] / float(self.valueBodyMass)
+                    arrayRightGRF[2][FrameNumber] += GRF_Lab[2] / float(self.valueBodyMass)
+                    
+                    arrayRightGRM[0][FrameNumber] += arraysCOPx[RightForcePlateIndex][FP_FrameNumber] - arrayPelvisOrigin[0][FrameNumber]
+                    arrayRightGRM[1][FrameNumber] += arraysCOPy[RightForcePlateIndex][FP_FrameNumber] - arrayPelvisOrigin[1][FrameNumber]
+                    arrayRightGRM[2][FrameNumber] += Sign * GRT[2] / float(self.valueBodyMass)
+                    
+                    # Store in array of one frame
+                    COP_Pelvis = np.array([arrayRightGRM[0][FrameNumber], arrayRightGRM[1][FrameNumber], arrayRightGRM[2][FrameNumber]])
+                    # Correct for Lab CS
+                    COP_Pelvis_Lab = math.TransformVectorIntoMovingCoors(COP_Pelvis, ELab)
+                    # Write back to GRM, account for walk direction and side for ML, and scale to % leg length
+                    arrayRightGRM[0][FrameNumber] = 100 * Direction * COP_Pelvis_Lab[0] / self.valueRightLegLength
+                    arrayRightGRM[1][FrameNumber] = 100 * Direction * Sign * COP_Pelvis_Lab[1] / self.valueRightLegLength
+                    
+                    # Add Foot CoP, compute components first and foot length
+                    AnkleCOP = COP - RightAnkleCenterLab
+                    AnkleCOP[2] = 0
+                    AnkleCOP_Foot = math.TransformVectorIntoMovingCoors(AnkleCOP, RightEFootAnat)
+                    FL = np.linalg.norm(RightToeMarker - RightAnkleCenterLab)
+                    # Normalize
+                    AnkleCOP_Foot_Normalized = 100 * AnkleCOP_Foot / FL
+                    # Account for foot progression angle and account for walk direction and M/L
+                    if np.linalg.norm(GRF) >=ForcePlate_Threshold: # Add to COP computation if GRF is above threshold
+                        arrayRightFootCoP[0][FrameNumber] += AnkleCOP_Foot_Normalized[0]
+                        arrayRightFootCoP[1][FrameNumber] += -AnkleCOP_Foot_Normalized[1]
+                        arrayRightFootCoP[2][FrameNumber] = 0
+                    ################################################## End: SLC Additions ######################################################
+                    
+                    
+                    # All Distances are in mm. Account for conversion to meters
+                    if RightForcePlateIndex == 0: # Add inertial component for first force plate
+                        RightAnkleForceLab[0] = FootMass * Direction * arrayRightFootLinearAccelerationLab[0][FrameNumber] /1e3
+                        RightAnkleForceLab[1] = FootMass * Direction * arrayRightFootLinearAccelerationLab[1][FrameNumber] /1e3 
+                        RightAnkleForceLab[2] = FootMass * arrayRightFootLinearAccelerationLab[2][FrameNumber] /1e3 + FootMass * 9.81
+                    if np.linalg.norm(GRF) >= ForcePlate_Threshold: # For additional force plates, add GRF
+                        RightAnkleForceLab[0] = RightAnkleForceLab[0] - GRF[0]
+                        RightAnkleForceLab[1] = RightAnkleForceLab[1] - GRF[1]
+                        RightAnkleForceLab[2] = RightAnkleForceLab[2] - GRF[2]
+                
+                        
+                    # vector from center of mass to proximal point of load application
+                    ProximalVector = RightAnkleCenterLab - RightFootCenterOfMass
+                    # vector from center of mass to distal point of load application
+                    DistalVector_Ankle = COP - RightFootCenterOfMass 
+                    
+                    MomentFromProximalForce = np.cross(ProximalVector,RightAnkleForceLab) / 1e3 # Convert from mm to meters
+                    MomentFromDistalForce_Ankle = np.cross(DistalVector_Ankle,GRF) / 1e3 # Convert from mm to meters
+                    
+                    # Tranform to Foot Coordinate System
+                    MomentFromProximalForce_Foot = math.TransformVectorIntoMovingCoors(MomentFromProximalForce, RightEFootAnat)
+                    MomentfromDistalForce_Foot = math.TransformVectorIntoMovingCoors(MomentFromDistalForce_Ankle, RightEFootAnat)
+                    GRT_Foot = math.TransformVectorIntoMovingCoors(GRT, RightEFootAnat)
+    
+                    if RightForcePlateIndex == 0: # Add inertial component for first force plate
+                        RightAnkleMoment_Foot[0] = RightFootMassMomentOfInertia[0] * RightFootAnglesAcceleration_Foot[0] + \
+                                                (RightFootMassMomentOfInertia[2] - RightFootMassMomentOfInertia[1]) * RightFootAnglesVelocity_Foot[1] * RightFootAnglesVelocity_Foot[2] \
+                                                    
+                        RightAnkleMoment_Foot[1] = RightFootMassMomentOfInertia[1] * RightFootAnglesAcceleration_Foot[1] + \
+                                                (RightFootMassMomentOfInertia[0] - RightFootMassMomentOfInertia[2]) * RightFootAnglesVelocity_Foot[2] * RightFootAnglesVelocity_Foot[0] \
+                                                    
+                        RightAnkleMoment_Foot[2] = RightFootMassMomentOfInertia[2] * RightFootAnglesAcceleration_Foot[2] + \
+                                                (RightFootMassMomentOfInertia[1] - RightFootMassMomentOfInertia[0]) * RightFootAnglesVelocity_Foot[0] * RightFootAnglesVelocity_Foot[1] \
+                                                    
+                    if np.linalg.norm(GRF) >= ForcePlate_Threshold: # For additional force plates, add Moment due to GRF
+                        RightAnkleMoment_Foot[0] = RightAnkleMoment_Foot[0] - MomentFromProximalForce_Foot[0] - MomentfromDistalForce_Foot[0] - GRT_Foot[0]
+                        RightAnkleMoment_Foot[1] = RightAnkleMoment_Foot[1] - MomentFromProximalForce_Foot[1] - MomentfromDistalForce_Foot[1] - GRT_Foot[1]
+                        RightAnkleMoment_Foot[2] = RightAnkleMoment_Foot[2] - MomentFromProximalForce_Foot[2] - MomentfromDistalForce_Foot[2] - GRT_Foot[2]
+                        
+                    
                 # Transform Ankle Moment to Lab coordinate system
                 RightAnkleMomentLab = math.TransformVectorIntoLabCoors(RightAnkleMoment_Foot,RightEFootAnat)
                 
@@ -2959,7 +3137,7 @@ class Dynamic_Main():
                 # All Distances are in mm. Account for conversion to meters
                 RightKneeForceLab[0] = ShankMass * Direction * arrayRightShankLinearAccelerationLab[0][FrameNumber] /1e3 - RightAnkleForceLab[0]
                 RightKneeForceLab[1] = ShankMass * Direction * arrayRightShankLinearAccelerationLab[1][FrameNumber] /1e3 - RightAnkleForceLab[1]
-                RightKneeForceLab[2] = ShankMass * arrayRightShankLinearAccelerationLab[2][FrameNumber] /1e3 - RightAnkleForceLab[2] + FootMass * 9.81
+                RightKneeForceLab[2] = ShankMass * arrayRightShankLinearAccelerationLab[2][FrameNumber] /1e3 - RightAnkleForceLab[2] + ShankMass * 9.81
                 
 
                 # vector from center of mass to proximal point of load application
@@ -3045,7 +3223,7 @@ class Dynamic_Main():
                 # All Distances are in mm. Account for conversion to meters
                 RightHipForceLab[0] = ThighMass * Direction * arrayRightThighLinearAccelerationLab[0][FrameNumber] /1e3 - RightKneeForceLab[0]
                 RightHipForceLab[1] = ThighMass * Direction * arrayRightThighLinearAccelerationLab[1][FrameNumber] /1e3 - RightKneeForceLab[1]
-                RightHipForceLab[2] = ThighMass * arrayRightThighLinearAccelerationLab[2][FrameNumber] /1e3 - RightKneeForceLab[2] + FootMass * 9.81
+                RightHipForceLab[2] = ThighMass * arrayRightThighLinearAccelerationLab[2][FrameNumber] /1e3 - RightKneeForceLab[2] + ThighMass * 9.81
                 
 
                 # vector from center of mass to proximal point of load application
@@ -3107,28 +3285,7 @@ class Dynamic_Main():
                 arrayRightHipJRF[1][FrameNumber] = Sign * RightHipForceThigh[1] / float(self.valueBodyMass)
                 arrayRightHipJRF[2][FrameNumber] = RightHipForceThigh[2] / float(self.valueBodyMass)
                 
-                # Add Ground Reaction Forces and Moments: Flip X and Y if walking in -X
-                # Correct for Lab CS
-                GRF = math.TransformVectorIntoMovingCoors(GRF, ELab)
-                # Account for side for ML and scale to BW
-                arrayRightGRF[0][FrameNumber] = GRF[0] / float(self.valueBodyMass)
-                arrayRightGRF[1][FrameNumber] = Sign * GRF[1] / float(self.valueBodyMass)
-                arrayRightGRF[2][FrameNumber] = GRF[2] / float(self.valueBodyMass)
-				
-                # Add Center of Pressure w.r.t. PELO
-                arrayRightGRM[0][FrameNumber] = arrayCOPx[FP_FrameNumber] - arrayPelvisOrigin[0][FrameNumber]
-                arrayRightGRM[1][FrameNumber] = arrayCOPy[FP_FrameNumber] - arrayPelvisOrigin[1][FrameNumber]
-                arrayRightGRM[2][FrameNumber] = Sign * GRT[2] / float(self.valueBodyMass)
-                
-                # Store in array of one frame
-                COP_Pelvis = np.array([arrayRightGRM[0][FrameNumber], arrayRightGRM[1][FrameNumber], arrayRightGRM[2][FrameNumber]])
-                # Correct for Lab CS
-                COP_Pelvis = math.TransformVectorIntoMovingCoors(COP_Pelvis, ELab)
-                # Write back to GRM, account for direction and side for ML, and scale to % leg length
-                arrayRightGRM[0][FrameNumber] = 100 * Direction * COP_Pelvis[0] / self.valueRightLegLength
-                arrayRightGRM[1][FrameNumber] = 100 * Sign * Direction * COP_Pelvis[1] / self.valueRightLegLength
-
-
+                # Add Moment and Power Sums
                 # Index 0 is sum of sagittal plane moment, Index 1 is sum of sagittal power, Index3 is sum of total power
                 arrayRightMPSum[0][FrameNumber] = arrayRightHipMoment[0][FrameNumber] + arrayRightKneeMoment[0][FrameNumber]  + \
                                                  arrayRightAnkleMoment[0][FrameNumber]
@@ -3136,18 +3293,6 @@ class Dynamic_Main():
                                                  arrayRightAnklePower[0][FrameNumber]
                 arrayRightMPSum[2][FrameNumber] = arrayRightHipPowerTotal[2][FrameNumber] + arrayRightKneePowerTotal[2][FrameNumber] + \
                                                  arrayRightAnklePowerTotal[2][FrameNumber]
-                
-                # Add Foot CoP, compute components first and foot length
-                AnkleCOP = COP - RightAnkleCenterLab
-                AnkleCOP[2] = 0
-                # Account for foot progression angle and account for walk direction and M/L
-                AnkleCOP_Foot = math.TransformVectorIntoMovingCoors(AnkleCOP, RightEFootAnat)
-                FL = np.linalg.norm(RightToeMarker - RightAnkleCenterLab)
-                # Normalize
-                AnkleCOP_Foot_Normalized = 100 * AnkleCOP_Foot / FL
-                arrayRightFootCoP[0][FrameNumber] = AnkleCOP_Foot_Normalized[0]
-                arrayRightFootCoP[1][FrameNumber] = -AnkleCOP_Foot_Normalized[1]
-                arrayRightFootCoP[2][FrameNumber] = 0
         
         # =============================================================================
         #         Write Kinetics Outputs to C3D File
@@ -3160,7 +3305,7 @@ class Dynamic_Main():
         ForceNormalizedTypes = ['ForceNormalized','ForceNormalized','ForceNormalized']
 
         # Left Moments and Power
-        if not LeftForcePlate_DeviceID == 0:
+        if not LeftForcePlate_DeviceIDs == []:
             if not 'LHipMoment' in ModelOutputs:
                 vicon.CreateModelOutput( SubjectName, 'LHipMoment',  'Moments', XYZNames, MomentsNormalizedTypes)
             if not 'LKneeMoment' in ModelOutputs:
@@ -3198,7 +3343,7 @@ class Dynamic_Main():
                 vicon.CreateModelOutput( SubjectName, 'LFootCoP', 'Angles', XYZNames, AnglesTypes)
         
         # Right Moments and Power
-        if not RightForcePlate_DeviceID == 0:
+        if not RightForcePlate_DeviceIDs == []:
             if not 'RHipMoment' in ModelOutputs:
                 vicon.CreateModelOutput( SubjectName, 'RHipMoment',  'Moments', XYZNames, MomentsNormalizedTypes)
             if not 'RKneeMoment' in ModelOutputs:
@@ -3260,7 +3405,7 @@ class Dynamic_Main():
         
         # Write Arrays to C3D Files
         # Left
-        if not LeftForcePlate_DeviceID == 0:
+        if not LeftForcePlate_DeviceIDs == []:
             vicon.SetModelOutput(SubjectName, 'LHipMoment', ReArranged_arrayLeftHipMoment,   exists)
             vicon.SetModelOutput(SubjectName, 'LKneeMoment', ReArranged_arrayLeftKneeMoment,   exists)
             vicon.SetModelOutput(SubjectName, 'LAnkleMoment', ReArranged_arrayLeftAnkleMoment,   exists)
@@ -3281,7 +3426,7 @@ class Dynamic_Main():
             vicon.SetModelOutput(SubjectName, 'LMomentPowerSum', arrayLeftMPSum, exists)
             vicon.SetModelOutput(SubjectName, 'LFootCoP', arrayLeftFootCoP, exists)
 
-        if not RightForcePlate_DeviceID == 0:
+        if not RightForcePlate_DeviceIDs == []:
             vicon.SetModelOutput(SubjectName, 'RHipMoment', ReArranged_arrayRightHipMoment,   exists)
             vicon.SetModelOutput(SubjectName, 'RKneeMoment', ReArranged_arrayRightKneeMoment,   exists)
             vicon.SetModelOutput(SubjectName, 'RAnkleMoment', ReArranged_arrayRightAnkleMoment,   exists)

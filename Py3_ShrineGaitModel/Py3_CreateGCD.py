@@ -21,12 +21,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # Program to Generate GCD files from C3D Files
 
 Created on Thu May 10 11:50:40 2018
-Last Update: Aug 26, 2024
+Last Update: Mar 27, 2026
 
 @author: psaraswat
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 """
-VersionNumber = 'Py3_v1.3'
+VersionNumber = 'Py3_v1.5'
 
 import sys
 import numpy as np
@@ -517,7 +517,8 @@ class CreateGCD_Main():
             LeftDoubleSupport  = LeftDoubleSupport1 + LeftDoubleSupport2
                         
             # Compute GCD Variables
-            [LeftTrunkTilt,LeftTrunkObliquity,LeftTrunkRotation]    = ComputeGCDVariable('LTrunkAngles' , NumPointsPerGraph, LeftStrike1, LeftStrike2)
+            if 'LTrunkAngles' in ModelOutputs:
+                [LeftTrunkTilt,LeftTrunkObliquity,LeftTrunkRotation]    = ComputeGCDVariable('LTrunkAngles' , NumPointsPerGraph, LeftStrike1, LeftStrike2)
             [LeftPelvicTilt,LeftPelvicObliquity,LeftPelvicRotation] = ComputeGCDVariable('LPelvisAngles', NumPointsPerGraph, LeftStrike1, LeftStrike2)
             [LeftHipFlexExt,LeftHipAbAdduct,LeftHipRotation]        = ComputeGCDVariable('LHipAngles'   , NumPointsPerGraph, LeftStrike1, LeftStrike2)
             [LeftKneeFlexExt,LeftKneeValgVar,LeftKneeRotation]      = ComputeGCDVariable('LKneeAngles'  , NumPointsPerGraph, LeftStrike1, LeftStrike2)
@@ -672,14 +673,18 @@ class CreateGCD_Main():
                     pass
                 
             # Check if Foot Model data exists
-            if self.valueLeftFootModelCheck == '1':
-                [LeftHindFootTilt,LeftHindFootObliquity,LeftHindFootRotation]                    = ComputeGCDVariable('LHFGA' , NumPointsPerGraph, LeftStrike1, LeftStrike2)
-                [LeftForeFootTilt,LeftForeFootObliquity,LeftForeFootRotation]                    = ComputeGCDVariable('LFFGA' , NumPointsPerGraph, LeftStrike1, LeftStrike2)
-                [LeftAnkleComplexDorsiPlanFlex,LeftAnkleComplexValgVar,LeftAnkleComplexRotation] = ComputeGCDVariable('LANKA' , NumPointsPerGraph, LeftStrike1, LeftStrike2)
-                [LeftMidFootDorsiPlanFlex,LeftMidFootSupPron,LeftMidFootAbAdduct]                = ComputeGCDVariable('LMDFA' , NumPointsPerGraph, LeftStrike1, LeftStrike2)
-                [LeftToeFlexExt,DummyY,LeftToeValgVar]                                           = ComputeGCDVariable('LHLXA' , NumPointsPerGraph, LeftStrike1, LeftStrike2)
-                [LeftSupination,DummyY,DummyZ]                                                   = ComputeGCDVariable('Supination' , NumPointsPerGraph, LeftStrike1, LeftStrike2)
-                [LeftSkew,DummyY,DummyZ]                                                         = ComputeGCDVariable('Skew'  , NumPointsPerGraph, LeftStrike1, LeftStrike2)
+            if hasattr(self, "valueLeftFootModelCheck"):
+                if self.valueLeftFootModelCheck == '1':
+                    [LeftHindFootTilt,LeftHindFootObliquity,LeftHindFootRotation]                    = ComputeGCDVariable('LHFGA' , NumPointsPerGraph, LeftStrike1, LeftStrike2)
+                    [LeftForeFootTilt,LeftForeFootObliquity,LeftForeFootRotation]                    = ComputeGCDVariable('LFFGA' , NumPointsPerGraph, LeftStrike1, LeftStrike2)
+                    [LeftAnkleComplexDorsiPlanFlex,LeftAnkleComplexValgVar,LeftAnkleComplexRotation] = ComputeGCDVariable('LANKA' , NumPointsPerGraph, LeftStrike1, LeftStrike2)
+                    [LeftMidFootDorsiPlanFlex,LeftMidFootSupPron,LeftMidFootAbAdduct]                = ComputeGCDVariable('LMDFA' , NumPointsPerGraph, LeftStrike1, LeftStrike2)
+                    [LeftMidFootDorsiPlanFlexROT,LeftMidFootSupPronROT,LeftMidFootAbAdductROT]       = ComputeGCDVariable('LMDFA_ROT' , NumPointsPerGraph, LeftStrike1, LeftStrike2)
+                    [LeftToeFlexExt,DummyY,LeftToeValgVar]                                           = ComputeGCDVariable('LHLXA' , NumPointsPerGraph, LeftStrike1, LeftStrike2)
+                    [LeftSupination,DummyY,DummyZ]                                                   = ComputeGCDVariable('Supination' , NumPointsPerGraph, LeftStrike1, LeftStrike2)
+                    [LeftSupinationROT,DummyY,DummyZ]                                                = ComputeGCDVariable('SupinationROT' , NumPointsPerGraph, LeftStrike1, LeftStrike2)
+                    [LeftSkew,DummyY,DummyZ]                                                         = ComputeGCDVariable('Skew'  , NumPointsPerGraph, LeftStrike1, LeftStrike2)
+                    [LeftSkewROT,DummyY,DummyZ]                                                      = ComputeGCDVariable('SkewROT'  , NumPointsPerGraph, LeftStrike1, LeftStrike2)
                 
             
             
@@ -862,7 +867,8 @@ class CreateGCD_Main():
             RightDoubleSupport  = RightDoubleSupport1 + RightDoubleSupport2
             
             # Compute GCD Variables
-            [RightTrunkTilt,RightTrunkObliquity,RightTrunkRotation]     = ComputeGCDVariable('RTrunkAngles' , NumPointsPerGraph, RightStrike1, RightStrike2)
+            if 'RTrunkAngles' in ModelOutputs:
+                [RightTrunkTilt,RightTrunkObliquity,RightTrunkRotation]     = ComputeGCDVariable('RTrunkAngles' , NumPointsPerGraph, RightStrike1, RightStrike2)
             [RightPelvicTilt,RightPelvicObliquity,RightPelvicRotation]  = ComputeGCDVariable('RPelvisAngles', NumPointsPerGraph, RightStrike1, RightStrike2)
             [RightHipFlexExt,RightHipAbAdduct,RightHipRotation]         = ComputeGCDVariable('RHipAngles'   , NumPointsPerGraph, RightStrike1, RightStrike2)
             [RightKneeFlexExt,RightKneeValgVar,RightKneeRotation]       = ComputeGCDVariable('RKneeAngles'  , NumPointsPerGraph, RightStrike1, RightStrike2)
@@ -1014,14 +1020,18 @@ class CreateGCD_Main():
                     pass
             
             # Check if Foot Model data exists
-            if self.valueRightFootModelCheck == '1':
-                [RightHindFootTilt,RightHindFootObliquity,RightHindFootRotation]                    = ComputeGCDVariable('RHFGA' , NumPointsPerGraph, RightStrike1, RightStrike2)
-                [RightForeFootTilt,RightForeFootObliquity,RightForeFootRotation]                    = ComputeGCDVariable('RFFGA' , NumPointsPerGraph, RightStrike1, RightStrike2)
-                [RightAnkleComplexDorsiPlanFlex,RightAnkleComplexValgVar,RightAnkleComplexRotation] = ComputeGCDVariable('RANKA' , NumPointsPerGraph, RightStrike1, RightStrike2)
-                [RightMidFootDorsiPlanFlex,RightMidFootSupPron,RightMidFootAbAdduct]                = ComputeGCDVariable('RMDFA' , NumPointsPerGraph, RightStrike1, RightStrike2)
-                [RightToeFlexExt,DummyY,RightToeValgVar]                                            = ComputeGCDVariable('RHLXA' , NumPointsPerGraph, RightStrike1, RightStrike2)
-                [DummyX,RightSupination,DummyZ]                                                     = ComputeGCDVariable('Supination' , NumPointsPerGraph, RightStrike1, RightStrike2)
-                [DummyX,RightSkew,DummyZ]                                                           = ComputeGCDVariable('Skew'  , NumPointsPerGraph, RightStrike1, RightStrike2)
+            if hasattr(self, "valueRightFootModelCheck"):
+                if self.valueRightFootModelCheck == '1':
+                    [RightHindFootTilt,RightHindFootObliquity,RightHindFootRotation]                    = ComputeGCDVariable('RHFGA' , NumPointsPerGraph, RightStrike1, RightStrike2)
+                    [RightForeFootTilt,RightForeFootObliquity,RightForeFootRotation]                    = ComputeGCDVariable('RFFGA' , NumPointsPerGraph, RightStrike1, RightStrike2)
+                    [RightAnkleComplexDorsiPlanFlex,RightAnkleComplexValgVar,RightAnkleComplexRotation] = ComputeGCDVariable('RANKA' , NumPointsPerGraph, RightStrike1, RightStrike2)
+                    [RightMidFootDorsiPlanFlex,RightMidFootSupPron,RightMidFootAbAdduct]                = ComputeGCDVariable('RMDFA' , NumPointsPerGraph, RightStrike1, RightStrike2)
+                    [RightMidFootDorsiPlanFlexROT,RightMidFootSupPronROT,RightMidFootAbAdductROT]       = ComputeGCDVariable('RMDFA_ROT' , NumPointsPerGraph, RightStrike1, RightStrike2)
+                    [RightToeFlexExt,DummyY,RightToeValgVar]                                            = ComputeGCDVariable('RHLXA' , NumPointsPerGraph, RightStrike1, RightStrike2)
+                    [DummyX,RightSupination,DummyZ]                                                     = ComputeGCDVariable('Supination' , NumPointsPerGraph, RightStrike1, RightStrike2)
+                    [DummyX,RightSupinationROT,DummyZ]                                                  = ComputeGCDVariable('SupinationROT' , NumPointsPerGraph, RightStrike1, RightStrike2)
+                    [DummyX,RightSkew,DummyZ]                                                           = ComputeGCDVariable('Skew'  , NumPointsPerGraph, RightStrike1, RightStrike2)
+                    [DummyX,RightSkewROT,DummyZ]                                                        = ComputeGCDVariable('SkewROT'  , NumPointsPerGraph, RightStrike1, RightStrike2)
                 
         
         # Write Temporal Variables in GCD File
@@ -1072,9 +1082,10 @@ class CreateGCD_Main():
             
         # Write Angles in GCD File
         if len(LeftFootStrikeEventFrames) >= 2:
-            WriteArrayToGCD(GCDFile,'LeftTrunkObliquity',LeftTrunkObliquity)
-            WriteArrayToGCD(GCDFile,'LeftTrunkTilt',LeftTrunkTilt)
-            WriteArrayToGCD(GCDFile,'LeftTrunkRotation',LeftTrunkRotation)
+            if 'LTrunkAngles' in ModelOutputs:
+                WriteArrayToGCD(GCDFile,'LeftTrunkObliquity',LeftTrunkObliquity)
+                WriteArrayToGCD(GCDFile,'LeftTrunkTilt',LeftTrunkTilt)
+                WriteArrayToGCD(GCDFile,'LeftTrunkRotation',LeftTrunkRotation)
             WriteArrayToGCD(GCDFile,'LeftPelvicObliquity',LeftPelvicObliquity)
             WriteArrayToGCD(GCDFile,'LeftPelvicTilt',LeftPelvicTilt)
             WriteArrayToGCD(GCDFile,'LeftPelvicRotation',LeftPelvicRotation)
@@ -1098,7 +1109,7 @@ class CreateGCD_Main():
             # Thigh, Shank, and Foot Inclination Angles
             WriteArrayToGCD(GCDFile,'LeftFemurSagittalInclination',LeftFemurSagittalInclination)
             WriteArrayToGCD(GCDFile,'LeftTibiaSagittalInclination',LeftTibiaSagittalInclination)
-            WriteArrayToGCD(GCDFile,'LeftFootSagittalInclination',LeftFootSagittalInclination)
+            WriteArrayToGCD(GCDFile,'LeftFootSagittalInclination',-LeftFootSagittalInclination)
             
             
             # Muscle Length
@@ -1195,29 +1206,36 @@ class CreateGCD_Main():
                     pass
                 
             # Check if Foot Model data exists
-            if self.valueLeftFootModelCheck == '1':
-                WriteArrayToGCD(GCDFile,'LeftHindFootTilt',LeftHindFootTilt)
-                WriteArrayToGCD(GCDFile,'LeftHindFootObliquity',LeftHindFootObliquity)
-                WriteArrayToGCD(GCDFile,'LeftHindFootRotation',LeftHindFootRotation)
-                WriteArrayToGCD(GCDFile,'LeftForeFootTilt',LeftForeFootTilt)
-                WriteArrayToGCD(GCDFile,'LeftForeFootRotation',LeftForeFootRotation)
-                WriteArrayToGCD(GCDFile,'LeftAnkleComplexDorsiPlanFlex',LeftAnkleComplexDorsiPlanFlex)
-                WriteArrayToGCD(GCDFile,'LeftAnkleComplexValgVar',LeftAnkleComplexValgVar)
-                WriteArrayToGCD(GCDFile,'LeftAnkleComplexRotation',LeftAnkleComplexRotation)
-                WriteArrayToGCD(GCDFile,'LeftMidFootDorsiPlanFlex',LeftMidFootDorsiPlanFlex)
-                WriteArrayToGCD(GCDFile,'LeftMidFootSupPron',LeftMidFootSupPron)
-                WriteArrayToGCD(GCDFile,'LeftMidFootAbAdduct',LeftMidFootAbAdduct)
-                WriteArrayToGCD(GCDFile,'LeftHalDorsiPlanFlex',LeftToeFlexExt)
-                WriteArrayToGCD(GCDFile,'LeftHalValgVar',LeftToeValgVar)
-                WriteArrayToGCD(GCDFile,'LeftSupination',LeftSupination)
-                WriteArrayToGCD(GCDFile,'LeftSkew',LeftSkew)
+            if hasattr(self, "valueLeftFootModelCheck"):
+                if self.valueLeftFootModelCheck == '1':
+                    WriteArrayToGCD(GCDFile,'LeftHindFootTilt',LeftHindFootTilt)
+                    WriteArrayToGCD(GCDFile,'LeftHindFootObliquity',LeftHindFootObliquity)
+                    WriteArrayToGCD(GCDFile,'LeftHindFootRotation',LeftHindFootRotation)
+                    WriteArrayToGCD(GCDFile,'LeftForeFootTilt',LeftForeFootTilt)
+                    WriteArrayToGCD(GCDFile,'LeftForeFootRotation',LeftForeFootRotation)
+                    WriteArrayToGCD(GCDFile,'LeftAnkleComplexDorsiPlanFlex',LeftAnkleComplexDorsiPlanFlex)
+                    WriteArrayToGCD(GCDFile,'LeftAnkleComplexValgVar',LeftAnkleComplexValgVar)
+                    WriteArrayToGCD(GCDFile,'LeftAnkleComplexRotation',LeftAnkleComplexRotation)
+                    WriteArrayToGCD(GCDFile,'LeftMidFootDorsiPlanFlex',LeftMidFootDorsiPlanFlex)
+                    WriteArrayToGCD(GCDFile,'LeftMidFootSupPron',LeftMidFootSupPron)
+                    WriteArrayToGCD(GCDFile,'LeftMidFootAbAdduct',LeftMidFootAbAdduct)
+                    WriteArrayToGCD(GCDFile,'LeftMidFootDorsiPlanFlexROT',LeftMidFootDorsiPlanFlexROT)
+                    WriteArrayToGCD(GCDFile,'LeftMidFootSupPronROT',LeftMidFootSupPronROT)
+                    WriteArrayToGCD(GCDFile,'LeftMidFootAbAdductROT',LeftMidFootAbAdductROT)
+                    WriteArrayToGCD(GCDFile,'LeftHalDorsiPlanFlex',LeftToeFlexExt)
+                    WriteArrayToGCD(GCDFile,'LeftHalValgVar',LeftToeValgVar)
+                    WriteArrayToGCD(GCDFile,'LeftSupination',LeftSupination)
+                    WriteArrayToGCD(GCDFile,'LeftSupinationROT',LeftSupinationROT)
+                    WriteArrayToGCD(GCDFile,'LeftSkew',LeftSkew)
+                    WriteArrayToGCD(GCDFile,'LeftSkewROT',LeftSkewROT)
                 
                 
             
-        if len(RightFootStrikeEventFrames) >= 2:       
-            WriteArrayToGCD(GCDFile,'RightTrunkObliquity',RightTrunkObliquity)
-            WriteArrayToGCD(GCDFile,'RightTrunkTilt',RightTrunkTilt)
-            WriteArrayToGCD(GCDFile,'RightTrunkRotation',RightTrunkRotation)
+        if len(RightFootStrikeEventFrames) >= 2:
+            if 'RTrunkAngles' in ModelOutputs:
+                WriteArrayToGCD(GCDFile,'RightTrunkObliquity',RightTrunkObliquity)
+                WriteArrayToGCD(GCDFile,'RightTrunkTilt',RightTrunkTilt)
+                WriteArrayToGCD(GCDFile,'RightTrunkRotation',RightTrunkRotation)
             WriteArrayToGCD(GCDFile,'RightPelvicObliquity',RightPelvicObliquity)
             WriteArrayToGCD(GCDFile,'RightPelvicTilt',RightPelvicTilt)
             WriteArrayToGCD(GCDFile,'RightPelvicRotation',RightPelvicRotation)
@@ -1241,7 +1259,7 @@ class CreateGCD_Main():
             # Thigh, Shank, and Foot Inclination Angles
             WriteArrayToGCD(GCDFile,'RightFemurSagittalInclination',RightFemurSagittalInclination)
             WriteArrayToGCD(GCDFile,'RightTibiaSagittalInclination',RightTibiaSagittalInclination)
-            WriteArrayToGCD(GCDFile,'RightFootSagittalInclination',RightFootSagittalInclination)
+            WriteArrayToGCD(GCDFile,'RightFootSagittalInclination',-RightFootSagittalInclination)
             
             
             # Muscle Length
@@ -1336,22 +1354,28 @@ class CreateGCD_Main():
                     pass
             
             # Check if Foot Model data exists
-            if self.valueRightFootModelCheck == '1':
-                WriteArrayToGCD(GCDFile,'RightHindFootTilt',RightHindFootTilt)
-                WriteArrayToGCD(GCDFile,'RightHindFootObliquity',RightHindFootObliquity)
-                WriteArrayToGCD(GCDFile,'RightHindFootRotation',RightHindFootRotation)
-                WriteArrayToGCD(GCDFile,'RightForeFootTilt',RightForeFootTilt)
-                WriteArrayToGCD(GCDFile,'RightForeFootRotation',RightForeFootRotation)
-                WriteArrayToGCD(GCDFile,'RightAnkleComplexDorsiPlanFlex',RightAnkleComplexDorsiPlanFlex)
-                WriteArrayToGCD(GCDFile,'RightAnkleComplexValgVar',RightAnkleComplexValgVar)
-                WriteArrayToGCD(GCDFile,'RightAnkleComplexRotation',RightAnkleComplexRotation)
-                WriteArrayToGCD(GCDFile,'RightMidFootDorsiPlanFlex',RightMidFootDorsiPlanFlex)
-                WriteArrayToGCD(GCDFile,'RightMidFootSupPron',RightMidFootSupPron)
-                WriteArrayToGCD(GCDFile,'RightMidFootAbAdduct',RightMidFootAbAdduct)
-                WriteArrayToGCD(GCDFile,'RightHalDorsiPlanFlex',RightToeFlexExt)
-                WriteArrayToGCD(GCDFile,'RightHalValgVar',RightToeValgVar)
-                WriteArrayToGCD(GCDFile,'RightSupination',RightSupination)
-                WriteArrayToGCD(GCDFile,'RightSkew',RightSkew)
+            if hasattr(self, "valueRightFootModelCheck"):
+                if self.valueRightFootModelCheck == '1':
+                    WriteArrayToGCD(GCDFile,'RightHindFootTilt',RightHindFootTilt)
+                    WriteArrayToGCD(GCDFile,'RightHindFootObliquity',RightHindFootObliquity)
+                    WriteArrayToGCD(GCDFile,'RightHindFootRotation',RightHindFootRotation)
+                    WriteArrayToGCD(GCDFile,'RightForeFootTilt',RightForeFootTilt)
+                    WriteArrayToGCD(GCDFile,'RightForeFootRotation',RightForeFootRotation)
+                    WriteArrayToGCD(GCDFile,'RightAnkleComplexDorsiPlanFlex',RightAnkleComplexDorsiPlanFlex)
+                    WriteArrayToGCD(GCDFile,'RightAnkleComplexValgVar',RightAnkleComplexValgVar)
+                    WriteArrayToGCD(GCDFile,'RightAnkleComplexRotation',RightAnkleComplexRotation)
+                    WriteArrayToGCD(GCDFile,'RightMidFootDorsiPlanFlex',RightMidFootDorsiPlanFlex)
+                    WriteArrayToGCD(GCDFile,'RightMidFootSupPron',RightMidFootSupPron)
+                    WriteArrayToGCD(GCDFile,'RightMidFootAbAdduct',RightMidFootAbAdduct)
+                    WriteArrayToGCD(GCDFile,'RightMidFootDorsiPlanFlexROT',RightMidFootDorsiPlanFlexROT)
+                    WriteArrayToGCD(GCDFile,'RightMidFootSupPronROT',RightMidFootSupPronROT)
+                    WriteArrayToGCD(GCDFile,'RightMidFootAbAdductROT',RightMidFootAbAdductROT)
+                    WriteArrayToGCD(GCDFile,'RightHalDorsiPlanFlex',RightToeFlexExt)
+                    WriteArrayToGCD(GCDFile,'RightHalValgVar',RightToeValgVar)
+                    WriteArrayToGCD(GCDFile,'RightSupination',RightSupination)
+                    WriteArrayToGCD(GCDFile,'RightSupinationROT',RightSupinationROT)
+                    WriteArrayToGCD(GCDFile,'RightSkew',RightSkew)
+                    WriteArrayToGCD(GCDFile,'RightSkewROT',RightSkewROT)
 
         
         

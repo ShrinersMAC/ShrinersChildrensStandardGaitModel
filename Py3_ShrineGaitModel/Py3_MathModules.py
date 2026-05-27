@@ -21,13 +21,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # Vector/Matrix operations modules
 
 Created on Mon Feb 12 15:49:17 2018
-Last Update: 26 Aug, 2024
+Last Update: Mar 27, 2026
 
 @author: psaraswat
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 """
-
-VersionNumber = 'Py3_v1.3'
+VersionNumber = 'Py3_v1.5'
 
 import numpy as np
 import math

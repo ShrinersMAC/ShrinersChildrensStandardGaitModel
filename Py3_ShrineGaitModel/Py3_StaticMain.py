@@ -21,14 +21,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # Static Model computes posture and stores Technical to Anatomical Coordinate Transformaion
 
 Created on Thu Feb 01 11:09:51 2018
-Last Update: Aug 26, 2024
+Last Update: Mar 27, 2026
 
 @author: psaraswat
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 """
-VersionNumber = 'Py3_v1.3'
+VersionNumber = 'Py3_v1.5'
 
-import os.path
+import os
 import sys
 import datetime
 
@@ -51,7 +51,9 @@ vicon = ViconNexus.ViconNexus()
 import Py3_MathModules as math
 import Py3_GaitModules as gait
 
-UserPreferencesFileName = 'M:\\MAL Use Only\\MAL Software Program Files\\Python\\Py3_UserPreferences.py'
+# Get the directory of the current script
+script_path = os.path.dirname(os.path.abspath(__file__))
+UserPreferencesFileName = os.path.join(script_path,'Py3_UserPreferences.py')
 
 # First Argument is the command name, second argument is the testing condition
 DefaultTestingCondition = 'BF'
@@ -235,7 +237,7 @@ class PatientInfo_Page(tk.Frame):
 #       Anthropometric Parameters widgets are created here
 # =============================================================================
         # Draw box to identify Anthropometric Parameters region
-        SectionCanvas.create_rectangle(20, 280, 680, 715)
+        SectionCanvas.create_rectangle(20, 280, 680, 745)
         
         AnthropometricParametersTitle = tk.Label(self, text="Anthropometric Parameters", font=Large_Font)
         AnthropometricParametersTitle.place(x=50,y=260)
@@ -335,10 +337,10 @@ class PatientInfo_Page(tk.Frame):
         RightASIStoGTdist.place(x=250,y=535,width=80,height=20)
         
         #Draw box for Foot Model
-        SectionCanvas.create_rectangle(40, 575, 660, 710, outline='grey')
+        SectionCanvas.create_rectangle(40, 575, 660, 740, outline='grey')
         
         FootModelTitle = tk.Label(self, text="Foot Model", font=Small_Font)
-        FootModelTitle.place(x=75,y=562)
+        FootModelTitle.place(x=50,y=562)
         
         self.LeftFootModelCheck=tk.IntVar()
         self.LeftFootModelCheck.set('0')
@@ -350,7 +352,10 @@ class PatientInfo_Page(tk.Frame):
         RightFootModelCheckButton = tk.Checkbutton(self, text='Right', variable=self.RightFootModelCheck, font=Small_Font)
         RightFootModelCheckButton.place(x=250,y=580)
         
-        HindfootVarusUnitLabel = tk.Label(self, text='deg', font=Small_Font)
+        if self.HindfootValgusIsNegative is False:
+            HindfootVarusUnitLabel = tk.Label(self, text='deg [+Val/-Var]', font=Smaller_Font)
+        else:
+            HindfootVarusUnitLabel = tk.Label(self, text='deg [-Val/+Var]', font=Smaller_Font)
         HindfootVarusUnitLabel.place(x=50,y=610)
         HindfootVarusLabel = tk.Label(self, text='Hindfoot Varus/Valgus', font=Small_Font)
         HindfootVarusLabel.place(x=350,y=610)
@@ -359,7 +364,7 @@ class PatientInfo_Page(tk.Frame):
         RightHindfootVarus = tk.Entry(self,justify='center')
         RightHindfootVarus.place(x=250,y=610,width=80,height=20)
         
-        CalcanealPitchUnitLabel = tk.Label(self, text='deg', font=Small_Font)
+        CalcanealPitchUnitLabel = tk.Label(self, text='deg [+Up/-Down]', font=Smaller_Font)
         CalcanealPitchUnitLabel.place(x=50,y=635)
         CalcanealPitchLabel = tk.Label(self, text='Calcaneal Pitch', font=Small_Font)
         CalcanealPitchLabel.place(x=350,y=635)
@@ -368,16 +373,16 @@ class PatientInfo_Page(tk.Frame):
         RightCalcanealPitch = tk.Entry(self,justify='center')
         RightCalcanealPitch.place(x=250,y=635,width=80,height=20)
         
-        HindfootProgressionUnitLabel = tk.Label(self, text='deg', font=Small_Font)
+        HindfootProgressionUnitLabel = tk.Label(self, text='deg [+Int/-Ext]', font=Smaller_Font)
         HindfootProgressionUnitLabel.place(x=50,y=660)
-        HindfootProgressionLabel = tk.Label(self, text='Hindfoot Progression', font=Small_Font)
+        HindfootProgressionLabel = tk.Label(self, text='Hindfoot Progression [rel. to Bimalleolar axis]', font=Small_Font)
         HindfootProgressionLabel.place(x=350,y=660)
-        LeftHindfootProgression = tk.Entry(self,justify='center')
-        LeftHindfootProgression.place(x=150,y=660,width=80,height=20)
-        RightHindfootProgression = tk.Entry(self,justify='center')
-        RightHindfootProgression.place(x=250,y=660,width=80,height=20)
+        LeftHindfootProgression_reltoBiMal = tk.Entry(self,justify='center')
+        LeftHindfootProgression_reltoBiMal.place(x=150,y=660,width=80,height=20)
+        RightHindfootProgression_reltoBiMal = tk.Entry(self,justify='center')
+        RightHindfootProgression_reltoBiMal.place(x=250,y=660,width=80,height=20)
         
-        FirstMetatarsalPitchUnitLabel = tk.Label(self, text='deg', font=Small_Font)
+        FirstMetatarsalPitchUnitLabel = tk.Label(self, text='deg [-Up/+Down]', font=Smaller_Font)
         FirstMetatarsalPitchUnitLabel.place(x=50,y=685)
         FirstMetatarsalPitchLabel = tk.Label(self, text='First Metatarsal Pitch', font=Small_Font)
         FirstMetatarsalPitchLabel.place(x=350,y=685)
@@ -386,78 +391,87 @@ class PatientInfo_Page(tk.Frame):
         RightFirstMetatarsalPitch = tk.Entry(self,justify='center')
         RightFirstMetatarsalPitch.place(x=250,y=685,width=80,height=20)
         
+        ForefootProgressionUnitLabel = tk.Label(self, text='deg [+Int/-Ext]', font=Smaller_Font)
+        ForefootProgressionUnitLabel.place(x=50,y=710)
+        ForefootProgressionLabel = tk.Label(self, text='Forefoot Progression [rel. to Bimalleolar axis]', font=Small_Font)
+        ForefootProgressionLabel.place(x=350,y=710)
+        LeftForefootProgression_reltoBiMal = tk.Entry(self,justify='center')
+        LeftForefootProgression_reltoBiMal.place(x=150,y=710,width=80,height=20)
+        RightForefootProgression_reltoBiMal = tk.Entry(self,justify='center')
+        RightForefootProgression_reltoBiMal.place(x=250,y=710,width=80,height=20)
+        
         
         
 # =============================================================================
 #       Test Conditions widgets are created here
 # =============================================================================
         # Draw box to identify Test Conditions region
-        SectionCanvas.create_rectangle(20, 745, 680, 945)
+        SectionCanvas.create_rectangle(20, 765, 680, 945)
         
         TestConditionsTitle = tk.Label(self, text="Special Test Conditions", font=Large_Font)
-        TestConditionsTitle.place(x=50,y=725)
+        TestConditionsTitle.place(x=50,y=750)
         
         #Draw box for plantigrade condition
-        SectionCanvas.create_rectangle(40, 765, 660, 800, dash=1)
+        SectionCanvas.create_rectangle(40, 780, 660, 815, dash=1)
         
         PlantigradeLabel = tk.Label(self, text='Subject Plantigrade during Static Trial', font=Small_Font)
-        PlantigradeLabel.place(x=350,y=770)
+        PlantigradeLabel.place(x=350,y=785)
         self.LeftPlantigradeCheck=tk.IntVar()
         self.LeftPlantigradeCheck.set('1')
         LeftPlantigradeCheckButton = tk.Checkbutton(self, text='Left', variable=self.LeftPlantigradeCheck, font=Small_Font)
-        LeftPlantigradeCheckButton.place(x=150,y=770)
+        LeftPlantigradeCheckButton.place(x=150,y=785)
         self.RightPlantigradeCheck=tk.IntVar()
         self.RightPlantigradeCheck.set('1')
         RighttPlantigradeCheckButton = tk.Checkbutton(self, text='Right',variable=self.RightPlantigradeCheck, font=Small_Font)
-        RighttPlantigradeCheckButton.place(x=250,y=770)
+        RighttPlantigradeCheckButton.place(x=250,y=785)
         
         #Draw box for shod condition
-        SectionCanvas.create_rectangle(40, 810, 520, 890, dash=1)
+        SectionCanvas.create_rectangle(40, 820, 520, 900, dash=1)
         
         self.SubjectShodCheck = tk.IntVar()
         SujectShodCheckButton = tk.Checkbutton(self, text='Subject Shod (with or without orthoses)', variable=self.SubjectShodCheck, font=Small_Font)        
-        SujectShodCheckButton.place(x=150,y=815)
+        SujectShodCheckButton.place(x=150,y=825)
         SoleThicknessUnitLabel = tk.Label(self, text='mm', font=Small_Font)
-        SoleThicknessUnitLabel.place(x=50,y=860)
+        SoleThicknessUnitLabel.place(x=50,y=870)
         SoleThicknessDescriptionLine1Label = tk.Label(self, text='Difference in sole thicknes', font=Smaller_Font)
         SoleThicknessDescriptionLine2Label = tk.Label(self, text='between heel and toes (mm)', font=Smaller_Font)
-        SoleThicknessDescriptionLine1Label.place(x=350,y=840)
-        SoleThicknessDescriptionLine2Label.place(x=350,y=860)
+        SoleThicknessDescriptionLine1Label.place(x=350,y=850)
+        SoleThicknessDescriptionLine2Label.place(x=350,y=870)
         LeftSoleThicknessLabel = tk.Label(self, text='Left', font=Small_Font)
-        LeftSoleThicknessLabel.place(x=150,y=840)
+        LeftSoleThicknessLabel.place(x=150,y=850)
         RightSoleThicknessLabel = tk.Label(self, text='Right', font=Small_Font)
-        RightSoleThicknessLabel.place(x=250,y=840)
+        RightSoleThicknessLabel.place(x=250,y=850)
         LeftSoleThickness = tk.Entry(self,justify='center')
-        LeftSoleThickness.place(x=150,y=860,width=80,height=20)
+        LeftSoleThickness.place(x=150,y=870,width=80,height=20)
         RightSoleThickness = tk.Entry(self,justify='center')
-        RightSoleThickness.place(x=250,y=860,width=80,height=20)
+        RightSoleThickness.place(x=250,y=870,width=80,height=20)
         
         #Draw box for Medial Knee Marker or KAD Option
-        SectionCanvas.create_rectangle(530, 810, 660, 890, dash=1)
+        SectionCanvas.create_rectangle(530, 820, 660, 900, dash=1)
         
         KneeAlignmentLabel = tk.Label(self,text='Knee Option', font = Small_Font)
-        KneeAlignmentLabel.place(x=535, y=815)
+        KneeAlignmentLabel.place(x=535, y=825)
         self.KneeAlignmentCheck = tk.IntVar()
         self.KneeAlignmentCheck.set('1')
         KneeAlignmentCheckButton0 = tk.Radiobutton(self, text='KAD',variable=self.KneeAlignmentCheck, value=0, font=Small_Font)
         KneeAlignmentCheckButton1 = tk.Radiobutton(self, text='M/L Markers',variable=self.KneeAlignmentCheck, value=1, font=Small_Font)
-        KneeAlignmentCheckButton0.place(x=535,y=835)
-        KneeAlignmentCheckButton1.place(x=535,y=855)
+        KneeAlignmentCheckButton0.place(x=535,y=845)
+        KneeAlignmentCheckButton1.place(x=535,y=870)
         
         
         #Draw box for Pelvic Fix Option
-        SectionCanvas.create_rectangle(40, 900, 660, 940, dash=1)
+        SectionCanvas.create_rectangle(40, 905, 660, 940, dash=1)
         
         PelvicFixLabel = tk.Label(self, text='Apply Pelvic Fix Option', font=Small_Font)
-        PelvicFixLabel.place(x=350,y=905)
+        PelvicFixLabel.place(x=350,y=910)
         self.PelvicFixCheck=tk.IntVar()
         self.PelvicFixCheck.set('0')
         PelvicFixCheckButton0 = tk.Radiobutton(self, text='N/A',variable=self.PelvicFixCheck, value=0, font=Small_Font)
         PelvicFixCheckButton1 = tk.Radiobutton(self, text='Iliac',variable=self.PelvicFixCheck, value=1, font=Small_Font)
         PelvicFixCheckButton2 = tk.Radiobutton(self, text='Triad',variable=self.PelvicFixCheck, value=2, font=Small_Font)
-        PelvicFixCheckButton0.place(x=50,y=905)
-        PelvicFixCheckButton1.place(x=150,y=905)
-        PelvicFixCheckButton2.place(x=250,y=905)
+        PelvicFixCheckButton0.place(x=50,y=910)
+        PelvicFixCheckButton1.place(x=150,y=910)
+        PelvicFixCheckButton2.place(x=250,y=910)
                
 # =========================================================================================
 #       Read Parameters from Nexus or existing Static Parameters File and tabulate parameters    
@@ -504,19 +518,28 @@ class PatientInfo_Page(tk.Frame):
             self.RightFootModelCheck.set(self.valueRightFootModelCheck)
             LeftHindfootVarus.insert(0,self.valueLeftHindfootVarus)
             RightHindfootVarus.insert(0,self.valueRightHindfootVarus)
+            LeftCalcanealPitch.insert(0,self.valueLeftCalcanealPitch)
+            RightCalcanealPitch.insert(0,self.valueRightCalcanealPitch)
             # Hindfoot Progression values wouldn't exist in older Static File so leave emppy if unavailable
             try:
-                LeftHindfootProgression.insert(0,self.valueLeftHindfootProgression)
+                LeftHindfootProgression_reltoBiMal.insert(0,self.valueLeftHindfootProgression_reltoBiMal)
             except:
                 pass
             try:
-                RightHindfootProgression.insert(0,self.valueRightHindfootProgression)
+                RightHindfootProgression_reltoBiMal.insert(0,self.valueRightHindfootProgression_reltoBiMal)
             except:
                 pass
             LeftFirstMetatarsalPitch.insert(0,self.valueLeftFirstMetatarsalPitch)
             RightFirstMetatarsalPitch.insert(0,self.valueRightFirstMetatarsalPitch)
-            LeftCalcanealPitch.insert(0,self.valueLeftCalcanealPitch)
-            RightCalcanealPitch.insert(0,self.valueRightCalcanealPitch)
+            # Forefoot Progression values wouldn't exist in older Static File so leave emppy if unavailable
+            try:
+                LeftForefootProgression_reltoBiMal.insert(0,self.valueLeftForefootProgression_reltoBiMal)
+            except:
+                pass
+            try:
+                RightForefootProgression_reltoBiMal.insert(0,self.valueRightForefootProgression_reltoBiMal)
+            except:
+                pass
             self.LeftPlantigradeCheck.set(self.valueLeftPlantigradeCheck)
             self.RightPlantigradeCheck.set(self.valueRightPlantigradeCheck)
             # Write Sole Thickness values only when subjet is shod
@@ -547,25 +570,25 @@ class PatientInfo_Page(tk.Frame):
             if vicon.GetSubjectParam(SubjectName, 'Bodymass')[1] is True:
                 BodyMass.insert(0,round(vicon.GetSubjectParam( SubjectName, 'Bodymass' )[0],2))
             if vicon.GetSubjectParam(SubjectName, 'Height')[1] is True:
-                Height.insert(0,int(vicon.GetSubjectParam( SubjectName, 'Height' )[0]))
+                Height.insert(0,int(round(vicon.GetSubjectParam( SubjectName, 'Height' )[0],0)))
             if vicon.GetSubjectParam(SubjectName, 'InterAsisDistance')[1] is True:
-                ASISdist.insert(0,int(vicon.GetSubjectParam( SubjectName, 'InterAsisDistance' )[0]))
+                ASISdist.insert(0,int(round(vicon.GetSubjectParam( SubjectName, 'InterAsisDistance' )[0],0)))
             if vicon.GetSubjectParam(SubjectName, 'LeftLegLength')[1] is True:
-                LeftLegLength.insert(0,int(vicon.GetSubjectParam( SubjectName, 'LeftLegLength' )[0]))
+                LeftLegLength.insert(0,int(round(vicon.GetSubjectParam( SubjectName, 'LeftLegLength' )[0],0)))
             if vicon.GetSubjectParam(SubjectName, 'RightLegLength')[1] is True:
-                RightLegLength.insert(0,int(vicon.GetSubjectParam( SubjectName, 'RightLegLength' )[0]))
+                RightLegLength.insert(0,int(round(vicon.GetSubjectParam( SubjectName, 'RightLegLength' )[0],0)))
             if vicon.GetSubjectParam(SubjectName, 'LeftKneeWidth')[1] is True:
-                LeftKneeWidth.insert(0,int(vicon.GetSubjectParam( SubjectName, 'LeftKneeWidth' )[0]))
+                LeftKneeWidth.insert(0,int(round(vicon.GetSubjectParam( SubjectName, 'LeftKneeWidth' )[0],0)))
             if vicon.GetSubjectParam(SubjectName, 'RightKneeWidth')[1] is True:
-                RightKneeWidth.insert(0,int(vicon.GetSubjectParam( SubjectName, 'RightKneeWidth' )[0]))
+                RightKneeWidth.insert(0,int(round(vicon.GetSubjectParam( SubjectName, 'RightKneeWidth' )[0],0)))
             if vicon.GetSubjectParam(SubjectName, 'LeftAnkleWidth')[1] is True:
-                LeftAnkleWidth.insert(0,int(vicon.GetSubjectParam( SubjectName, 'LeftAnkleWidth' )[0]))
+                LeftAnkleWidth.insert(0,int(round(vicon.GetSubjectParam( SubjectName, 'LeftAnkleWidth' )[0],0)))
             if vicon.GetSubjectParam(SubjectName, 'RightAnkleWidth')[1] is True:
-                RightAnkleWidth.insert(0,int(vicon.GetSubjectParam( SubjectName, 'RightAnkleWidth' )[0]))
+                RightAnkleWidth.insert(0,int(round(vicon.GetSubjectParam( SubjectName, 'RightAnkleWidth' )[0],0)))
             if vicon.GetSubjectParam(SubjectName, 'LeftAsisTrocanterDistance')[1] is True:
-                LeftASIStoGTdist.insert(0,int(vicon.GetSubjectParam( SubjectName, 'LeftAsisTrocanterDistance' )[0]))
+                LeftASIStoGTdist.insert(0,int(round(vicon.GetSubjectParam( SubjectName, 'LeftAsisTrocanterDistance' )[0],0)))
             if vicon.GetSubjectParam(SubjectName, 'RightAsisTrocanterDistance')[1] is True:
-                RightASIStoGTdist.insert(0,int(vicon.GetSubjectParam( SubjectName, 'RightAsisTrocanterDistance' )[0]))
+                RightASIStoGTdist.insert(0,int(round(vicon.GetSubjectParam( SubjectName, 'RightAsisTrocanterDistance' )[0],0)))
             # Read Foot Model Parameters
             if vicon.GetSubjectParam(SubjectName, 'LeftVarValAngle')[1] is True:
                 LeftHindfootVarus.insert(0,int(round(vicon.GetSubjectParam( SubjectName, 'LeftVarValAngle' )[0],0)))
@@ -573,14 +596,26 @@ class PatientInfo_Page(tk.Frame):
             if vicon.GetSubjectParam(SubjectName, 'RightVarValAngle')[1] is True:
                 RightHindfootVarus.insert(0,int(round(vicon.GetSubjectParam( SubjectName, 'RightVarValAngle' )[0],0)))
                 self.RightFootModelCheck.set('1')
-            if vicon.GetSubjectParam(SubjectName, 'Left1stRayPitch')[1] is True:
-                LeftFirstMetatarsalPitch.insert(0,int(vicon.GetSubjectParam( SubjectName, 'Left1stRayPitch' )[0]))
-            if vicon.GetSubjectParam(SubjectName, 'Right1stRayPitch')[1] is True:
-                RightFirstMetatarsalPitch.insert(0,int(vicon.GetSubjectParam( SubjectName, 'Right1stRayPitch' )[0]))
+            
             if vicon.GetSubjectParam(SubjectName, 'LeftCalcanealPitch')[1] is True:
-                LeftCalcanealPitch.insert(0,int(vicon.GetSubjectParam( SubjectName, 'LeftCalcanealPitch' )[0]))
+                LeftCalcanealPitch.insert(0,int(round(vicon.GetSubjectParam( SubjectName, 'LeftCalcanealPitch' )[0],0)))
             if vicon.GetSubjectParam(SubjectName, 'RightCalcanealPitch')[1] is True:
-                RightCalcanealPitch.insert(0,int(vicon.GetSubjectParam( SubjectName, 'RightCalcanealPitch' )[0]))
+                RightCalcanealPitch.insert(0,int(round(vicon.GetSubjectParam( SubjectName, 'RightCalcanealPitch' )[0],0)))
+            if vicon.GetSubjectParam(SubjectName, 'LeftHindfootProgression_relBiMal')[1] is True:
+                LeftHindfootProgression_reltoBiMal.insert(0,int(round(vicon.GetSubjectParam( SubjectName, 'LeftHindfootProgression_relBiMal' )[0],0)))
+            if vicon.GetSubjectParam(SubjectName, 'RightHindfootProgression_relBiMal')[1] is True:
+                RightHindfootProgression_reltoBiMal.insert(0,int(round(vicon.GetSubjectParam( SubjectName, 'RightHindfootProgression_relBiMal' )[0],0)))
+            if vicon.GetSubjectParam(SubjectName, 'Left1stRayPitch')[1] is True:
+                LeftFirstMetatarsalPitch.insert(0,int(round(vicon.GetSubjectParam( SubjectName, 'Left1stRayPitch' )[0],0)))
+            if vicon.GetSubjectParam(SubjectName, 'Right1stRayPitch')[1] is True:
+                RightFirstMetatarsalPitch.insert(0,int(round(vicon.GetSubjectParam( SubjectName, 'Right1stRayPitch' )[0],0)))
+            if vicon.GetSubjectParam(SubjectName, 'LeftForefootProgression_relBiMal')[1] is True:
+                LeftForefootProgression_reltoBiMal.insert(0,int(round(vicon.GetSubjectParam( SubjectName, 'LeftForefootProgression_relBiMal' )[0],0)))
+            if vicon.GetSubjectParam(SubjectName, 'RightForefootProgression_relBiMal')[1] is True:
+                RightForefootProgression_reltoBiMal.insert(0,int(round(vicon.GetSubjectParam( SubjectName, 'RightForefootProgression_relBiMal' )[0],0)))
+            
+            
+            
             #############################    
             # Read Calcaneal Pitch and Varus Valgus from Sitting Foot Static, if exists
             if os.path.exists(SittingFootStaticDataFileName):
@@ -596,14 +631,25 @@ class PatientInfo_Page(tk.Frame):
                 LeftHindfootVarus.insert(0,self.valueLeftHindfootVarus)
                 RightHindfootVarus.insert(0,self.valueRightHindfootVarus)
                 
-                LeftHindfootProgression.delete(0,tk.END)
-                RightHindfootProgression.delete(0,tk.END)
+                LeftHindfootProgression_reltoBiMal.delete(0,tk.END)
+                RightHindfootProgression_reltoBiMal.delete(0,tk.END)
                 try:
-                    LeftHindfootProgression.insert(0,self.valueLeftHindfootProgression)
+                    LeftHindfootProgression_reltoBiMal.insert(0,self.valueLeftHindfootProgression_reltoBiMal)
                 except:
                     pass
                 try:
-                    RightHindfootProgression.insert(0,self.valueRightHindfootProgression)
+                    RightHindfootProgression_reltoBiMal.insert(0,self.valueRightHindfootProgression_reltoBiMal)
+                except:
+                    pass
+                
+                LeftForefootProgression_reltoBiMal.delete(0,tk.END)
+                RightForefootProgression_reltoBiMal.delete(0,tk.END)
+                try:
+                    LeftForefootProgression_reltoBiMal.insert(0,self.valueLeftForefootProgression_reltoBiMal)
+                except:
+                    pass
+                try:
+                    RightForefootProgression_reltoBiMal.insert(0,self.valueRightForefootProgression_reltoBiMal)
                 except:
                     pass
                 
@@ -723,12 +769,14 @@ class PatientInfo_Page(tk.Frame):
                 StaticDataFile.write('self.valueRightFootModelCheck = ' + "'" + str(self.RightFootModelCheck.get()) + "'" + '\n')
                 StaticDataFile.write('self.valueLeftHindfootVarus = ' + "'" + LeftHindfootVarus.get() + "'" + '\n')
                 StaticDataFile.write('self.valueLeftCalcanealPitch = ' + "'" + LeftCalcanealPitch.get() + "'" + '\n')
-                StaticDataFile.write('self.valueLeftHindfootProgression = ' + "'" + LeftHindfootProgression.get() + "'" + '\n')
+                StaticDataFile.write('self.valueLeftHindfootProgression_reltoBiMal = ' + "'" + LeftHindfootProgression_reltoBiMal.get() + "'" + '\n')
                 StaticDataFile.write('self.valueLeftFirstMetatarsalPitch = ' + "'" + LeftFirstMetatarsalPitch.get() + "'" + '\n')
+                StaticDataFile.write('self.valueLeftForefootProgression_reltoBiMal = ' + "'" + LeftForefootProgression_reltoBiMal.get() + "'" + '\n')
                 StaticDataFile.write('self.valueRightHindfootVarus = ' + "'" + RightHindfootVarus.get() + "'" + '\n')
                 StaticDataFile.write('self.valueRightCalcanealPitch = ' + "'" + RightCalcanealPitch.get() + "'" + '\n')
-                StaticDataFile.write('self.valueRightHindfootProgression = ' + "'" + RightHindfootProgression.get() + "'" + '\n')
+                StaticDataFile.write('self.valueRightHindfootProgression_reltoBiMal = ' + "'" + RightHindfootProgression_reltoBiMal.get() + "'" + '\n')
                 StaticDataFile.write('self.valueRightFirstMetatarsalPitch = ' + "'" + RightFirstMetatarsalPitch.get() + "'" + '\n')
+                StaticDataFile.write('self.valueRightForefootProgression_reltoBiMal = ' + "'" + RightForefootProgression_reltoBiMal.get() + "'" + '\n')
                 StaticDataFile.write('self.valueLeftPlantigradeCheck = ' + "'" + str(self.LeftPlantigradeCheck.get()) + "'" + '\n')
                 StaticDataFile.write('self.valueRightPlantigradeCheck = ' + "'" + str(self.RightPlantigradeCheck.get()) + "'" + '\n')
                 StaticDataFile.write('self.valueSujectShodCheck = ' + "'" + str(self.SubjectShodCheck.get()) + "'" + '\n')
@@ -797,12 +845,14 @@ class PatientInfo_Page(tk.Frame):
                 StaticDataFile.write('self.valueRightFootModelCheck = ' + "'" + str(self.RightFootModelCheck.get()) + "'" + '\n')
                 StaticDataFile.write('self.valueLeftHindfootVarus = ' + "'" + LeftHindfootVarus.get() + "'" + '\n')
                 StaticDataFile.write('self.valueLeftCalcanealPitch = ' + "'" + LeftCalcanealPitch.get() + "'" + '\n')
-                StaticDataFile.write('self.valueLeftHindfootProgression = ' + "'" + LeftHindfootProgression.get() + "'" + '\n')
+                StaticDataFile.write('self.valueLeftHindfootProgression_reltoBiMal = ' + "'" + LeftHindfootProgression_reltoBiMal.get() + "'" + '\n')
                 StaticDataFile.write('self.valueLeftFirstMetatarsalPitch = ' + "'" + LeftFirstMetatarsalPitch.get() + "'" + '\n')
+                StaticDataFile.write('self.valueLeftForefootProgression_reltoBiMal = ' + "'" + LeftForefootProgression_reltoBiMal.get() + "'" + '\n')
                 StaticDataFile.write('self.valueRightHindfootVarus = ' + "'" + RightHindfootVarus.get() + "'" + '\n')
                 StaticDataFile.write('self.valueRightCalcanealPitch = ' + "'" + RightCalcanealPitch.get() + "'" + '\n')
-                StaticDataFile.write('self.valueRightHindfootProgression = ' + "'" + RightHindfootProgression.get() + "'" + '\n')
+                StaticDataFile.write('self.valueRightHindfootProgression_reltoBiMal = ' + "'" + RightHindfootProgression_reltoBiMal.get() + "'" + '\n')
                 StaticDataFile.write('self.valueRightFirstMetatarsalPitch = ' + "'" + RightFirstMetatarsalPitch.get() + "'" + '\n')
+                StaticDataFile.write('self.valueRightForefootProgression_reltoBiMal = ' + "'" + RightForefootProgression_reltoBiMal.get() + "'" + '\n')
                 StaticDataFile.write('self.valueLeftPlantigradeCheck = ' + "'" + str(self.LeftPlantigradeCheck.get()) + "'" + '\n')
                 StaticDataFile.write('self.valueRightPlantigradeCheck = ' + "'" + str(self.RightPlantigradeCheck.get()) + "'" + '\n')
                 StaticDataFile.write('self.valueSujectShodCheck = ' + "'" + str(self.SubjectShodCheck.get()) + "'" + '\n')
@@ -1077,9 +1127,9 @@ class QAreport_Page(tk.Frame):
                 except:
                     LeftPSISMarkerX, LeftPSISMarkerY, LeftPSISMarkerZ, LeftPSISMarkerExists = MarkerArrayCheck(SubjectName, self.LeftPSISMarkerName)
                     RightPSISMarkerX, RightPSISMarkerY, RightPSISMarkerZ, RightPSISMarkerExists = MarkerArrayCheck(SubjectName, self.RightPSISMarkerName)
-                    SacralMarkerX = (LeftPSISMarkerX + RightPSISMarkerX) / 2
-                    SacralMarkerY = (LeftPSISMarkerY + RightPSISMarkerY) / 2
-                    SacralMarkerZ = (LeftPSISMarkerZ + RightPSISMarkerZ) / 2
+                    SacralMarkerX = (np.array(LeftPSISMarkerX) + np.array(RightPSISMarkerX)) / 2
+                    SacralMarkerY = (np.array(LeftPSISMarkerY) + np.array(RightPSISMarkerY)) / 2
+                    SacralMarkerZ = (np.array(LeftPSISMarkerZ) + np.array(RightPSISMarkerZ)) / 2
             
             if self.valuePelvicFixCheck == '2':
                 LeftPSISMarkerX, LeftPSISMarkerY, LeftPSISMarkerZ, LeftPSISMarkerExists = MarkerArrayCheck(SubjectName, self.LeftPSISMarkerName)
@@ -1492,23 +1542,23 @@ class StaticSubjectCalibrationReport_Page(tk.Frame):
         FilePath, FileName = vicon.GetTrialName()
         
         StaticFileLabel = tk.Label(self, text="Static File-", font=Small_Font)
-        StaticFileLabel.place(x=50,y=50)
-        SectionCanvas.create_rectangle(195, 45, 680, 75, dash=1)
+        StaticFileLabel.place(x=50,y=30)
+        SectionCanvas.create_rectangle(195, 25, 680, 55, dash=1)
         StaticFile = tk.Label(self, text=str(FileName + '.c3d'), font=Small_Font )
-        StaticFile.place(x=200,y=50)
+        StaticFile.place(x=200,y=30)
         
         ModelLabel = tk.Label(self, text="Model-", font=Small_Font)
-        ModelLabel.place(x=50,y=100)
+        ModelLabel.place(x=50,y=70)
         FilePath, FileName = vicon.GetTrialName()
-        SectionCanvas.create_rectangle(195, 95, 680, 125, dash=1)
+        SectionCanvas.create_rectangle(195, 65, 680, 95, dash=1)
         Model = tk.Label(self, text='Shriners Gait Model', font=Small_Font )
-        Model.place(x=200,y=100)
+        Model.place(x=200,y=70)
         
         UserPreferenceLabel = tk.Label(self,text='User Preference', font=Small_Font)
-        UserPreferenceLabel.place(x=50,y=150)
-        SectionCanvas.create_rectangle(195, 145, 680, 175, dash=1)
+        UserPreferenceLabel.place(x=50,y=110)
+        SectionCanvas.create_rectangle(195, 105, 680, 135, dash=1)
         UserPreference = tk.Label(self, text=UserPreferencesFileName, font=Smaller_Font, anchor='w' )
-        UserPreference.place(x=200,y=150,width=470)
+        UserPreference.place(x=200,y=110,width=470)
         
         #Create Error Label but place them only if error occurs
         ErrorMessagesLabel = tk.Label(self,text='Warnings', font=Bold_Small_Font)
@@ -1525,128 +1575,135 @@ class StaticSubjectCalibrationReport_Page(tk.Frame):
 # =============================================================================
 #       Posture Information Form  widgets are created here
 # =============================================================================
-        SectionCanvas.create_rectangle(20, 200, 680, 865)
+        SectionCanvas.create_rectangle(20, 170, 680, 865)
         
         StandingPostureLabel = tk.Label(self, text="Standing Posture (degrees)", font=Large_Font)
-        StandingPostureLabel.place(x=50,y=180)
+        StandingPostureLabel.place(x=50,y=150)
         
         LeftLabel = tk.Label(self, text='Left', font=Bold_Small_Font)
-        LeftLabel.place(x=425,y=210)
+        LeftLabel.place(x=425,y=180)
         
         RightLabel = tk.Label(self, text='Right', font=Bold_Small_Font)
-        RightLabel.place(x=575,y=210)
+        RightLabel.place(x=575,y=180)
         
         TrunkObliquityLabel = tk.Label(self, text='Trunk Obliqity', font=Small_Font, anchor='e') 
-        TrunkObliquityLabel.place(x=100,y=238,width=290)
+        TrunkObliquityLabel.place(x=100,y=208,width=290)
         LeftTrunkObliquity = tk.Entry(self,justify='center')
-        LeftTrunkObliquity.place(x=400,y=240,height=20,width=100)
+        LeftTrunkObliquity.place(x=400,y=210,height=20,width=100)
         RightTrunkObliquity = tk.Entry(self,justify='center')
-        RightTrunkObliquity.place(x=550,y=240,height=20,width=100)
+        RightTrunkObliquity.place(x=550,y=210,height=20,width=100)
         
         TrunkTiltLabel = tk.Label(self, text='Trunk Tilt', font=Small_Font, anchor='e') 
-        TrunkTiltLabel.place(x=100,y=263,width=290)
+        TrunkTiltLabel.place(x=100,y=232,width=290)
         LeftTrunkTilt = tk.Entry(self,justify='center')
-        LeftTrunkTilt.place(x=400,y=265,height=20,width=100)
+        LeftTrunkTilt.place(x=400,y=235,height=20,width=100)
         RightTrunkTilt = tk.Entry(self,justify='center')
-        RightTrunkTilt.place(x=550,y=265,height=20,width=100)
+        RightTrunkTilt.place(x=550,y=235,height=20,width=100)
         
         TrunkRotationLabel = tk.Label(self, text='Trunk Rotation', font=Small_Font, anchor='e') 
-        TrunkRotationLabel.place(x=100,y=288,width=290)
+        TrunkRotationLabel.place(x=100,y=258,width=290)
         LeftTrunkRotation = tk.Entry(self,justify='center')
-        LeftTrunkRotation.place(x=400,y=290,height=20,width=100)
+        LeftTrunkRotation.place(x=400,y=260,height=20,width=100)
         RightTrunkRotation = tk.Entry(self,justify='center')
-        RightTrunkRotation.place(x=550,y=290,height=20,width=100)
+        RightTrunkRotation.place(x=550,y=260,height=20,width=100)
         
         PelvisObliquityLabel = tk.Label(self, text='Pelvic Obliquity', font=Small_Font, anchor='e') 
-        PelvisObliquityLabel.place(x=100,y=313,width=290)
+        PelvisObliquityLabel.place(x=100,y=283,width=290)
         LeftPelvisObliquity = tk.Entry(self,justify='center')
-        LeftPelvisObliquity.place(x=400,y=315,height=20,width=100)
+        LeftPelvisObliquity.place(x=400,y=285,height=20,width=100)
         RightPelvisObliquity = tk.Entry(self,justify='center')
-        RightPelvisObliquity.place(x=550,y=315,height=20,width=100)
+        RightPelvisObliquity.place(x=550,y=285,height=20,width=100)
         
         PelvisTiltLabel = tk.Label(self, text='Pelvic Tilt', font=Small_Font, anchor='e') 
-        PelvisTiltLabel.place(x=100,y=338,width=290)
+        PelvisTiltLabel.place(x=100,y=308,width=290)
         LeftPelvisTilt = tk.Entry(self,justify='center')
-        LeftPelvisTilt.place(x=400,y=340,height=20,width=100)
+        LeftPelvisTilt.place(x=400,y=310,height=20,width=100)
         RightPelvisTilt = tk.Entry(self,justify='center')
-        RightPelvisTilt.place(x=550,y=340,height=20,width=100)
+        RightPelvisTilt.place(x=550,y=310,height=20,width=100)
         
         PelvisRotationLabel = tk.Label(self, text='Pelvic Rotation', font=Small_Font, anchor='e') 
-        PelvisRotationLabel.place(x=100,y=363,width=290)
+        PelvisRotationLabel.place(x=100,y=333,width=290)
         LeftPelvisRotation = tk.Entry(self,justify='center')
-        LeftPelvisRotation.place(x=400,y=365,height=20,width=100)
+        LeftPelvisRotation.place(x=400,y=335,height=20,width=100)
         RightPelvisRotation = tk.Entry(self,justify='center')
-        RightPelvisRotation.place(x=550,y=365,height=20,width=100)
+        RightPelvisRotation.place(x=550,y=335,height=20,width=100)
         
         HipAbAdductionLabel = tk.Label(self, text='Hip Ab/Adduction', font=Small_Font, anchor='e') 
-        HipAbAdductionLabel.place(x=100,y=388,width=290)
+        HipAbAdductionLabel.place(x=100,y=358,width=290)
         LeftHipAbAdduction = tk.Entry(self,justify='center')
-        LeftHipAbAdduction.place(x=400,y=390,height=20,width=100)
+        LeftHipAbAdduction.place(x=400,y=360,height=20,width=100)
         RightHipAbAdduction = tk.Entry(self,justify='center')
-        RightHipAbAdduction.place(x=550,y=390,height=20,width=100)
+        RightHipAbAdduction.place(x=550,y=360,height=20,width=100)
         
         HipFlexExtensionLabel = tk.Label(self, text='Hip Flex/Extension', font=Small_Font, anchor='e') 
-        HipFlexExtensionLabel.place(x=100,y=413,width=290)
+        HipFlexExtensionLabel.place(x=100,y=383,width=290)
         LeftHipFlexExtension = tk.Entry(self,justify='center')
-        LeftHipFlexExtension.place(x=400,y=415,height=20,width=100)
+        LeftHipFlexExtension.place(x=400,y=385,height=20,width=100)
         RightHipFlexExtension = tk.Entry(self,justify='center')
-        RightHipFlexExtension.place(x=550,y=415,height=20,width=100)
+        RightHipFlexExtension.place(x=550,y=385,height=20,width=100)
         
         HipIntExtRotationLabel = tk.Label(self, text='Hip Int/Ext Rotation', font=Small_Font, anchor='e') 
-        HipIntExtRotationLabel.place(x=100,y=438,width=290)
+        HipIntExtRotationLabel.place(x=100,y=408,width=290)
         LeftHipIntExtRotation = tk.Entry(self,justify='center')
-        LeftHipIntExtRotation.place(x=400,y=440,height=20,width=100)
+        LeftHipIntExtRotation.place(x=400,y=410,height=20,width=100)
         RightHipIntExtRotation = tk.Entry(self,justify='center')
-        RightHipIntExtRotation.place(x=550,y=440,height=20,width=100)
+        RightHipIntExtRotation.place(x=550,y=410,height=20,width=100)
         
         KneeVarusValgusLabel = tk.Label(self, text='Knee Varus/Valgus', font=Small_Font, anchor='e') 
-        KneeVarusValgusLabel.place(x=100,y=463,width=290)
+        KneeVarusValgusLabel.place(x=100,y=433,width=290)
         LeftKneeVarusValgus = tk.Entry(self,justify='center')
-        LeftKneeVarusValgus.place(x=400,y=465,height=20,width=100)
+        LeftKneeVarusValgus.place(x=400,y=435,height=20,width=100)
         RightKneeVarusValgus = tk.Entry(self,justify='center')
-        RightKneeVarusValgus.place(x=550,y=465,height=20,width=100)
+        RightKneeVarusValgus.place(x=550,y=435,height=20,width=100)
         
         KneeFlexExtensionLabel = tk.Label(self, text='Knee Flex/Extension', font=Small_Font, anchor='e') 
-        KneeFlexExtensionLabel.place(x=100,y=488,width=290)
+        KneeFlexExtensionLabel.place(x=100,y=458,width=290)
         LeftKneeFlexExtension = tk.Entry(self,justify='center')
-        LeftKneeFlexExtension.place(x=400,y=490,height=20,width=100)
+        LeftKneeFlexExtension.place(x=400,y=460,height=20,width=100)
         RightKneeFlexExtension = tk.Entry(self,justify='center')
-        RightKneeFlexExtension.place(x=550,y=490,height=20,width=100)
+        RightKneeFlexExtension.place(x=550,y=460,height=20,width=100)
         
         KneeIntExtRotationLabel = tk.Label(self, text='Knee Int/Ext Rotation', font=Small_Font, anchor='e') 
-        KneeIntExtRotationLabel.place(x=100,y=513,width=290)
+        KneeIntExtRotationLabel.place(x=100,y=483,width=290)
         LeftKneeIntExtRotation = tk.Entry(self,justify='center')
-        LeftKneeIntExtRotation.place(x=400,y=515,height=20,width=100)
+        LeftKneeIntExtRotation.place(x=400,y=485,height=20,width=100)
         RightKneeIntExtRotation = tk.Entry(self,justify='center')
-        RightKneeIntExtRotation.place(x=550,y=515,height=20,width=100)
+        RightKneeIntExtRotation.place(x=550,y=485,height=20,width=100)
         
         KneeProgressionLabel = tk.Label(self, text='Knee Progression', font=Small_Font, anchor='e') 
-        KneeProgressionLabel.place(x=100,y=538,width=290)
+        KneeProgressionLabel.place(x=100,y=508,width=290)
         LeftKneeProgression = tk.Entry(self,justify='center')
-        LeftKneeProgression.place(x=400,y=540,height=20,width=100)
+        LeftKneeProgression.place(x=400,y=510,height=20,width=100)
         RightKneeProgression = tk.Entry(self,justify='center')
-        RightKneeProgression.place(x=550,y=540,height=20,width=100)
+        RightKneeProgression.place(x=550,y=510,height=20,width=100)
         
         AnklePlantarDorsiflexionLabel = tk.Label(self, text='Ankle Plantar/Dorsiflexion', font=Small_Font, anchor='e') 
-        AnklePlantarDorsiflexionLabel.place(x=100,y=563,width=290)
+        AnklePlantarDorsiflexionLabel.place(x=100,y=533,width=290)
         LeftAnklePlantarDorsiflexion = tk.Entry(self,justify='center')
-        LeftAnklePlantarDorsiflexion.place(x=400,y=565,height=20,width=100)
+        LeftAnklePlantarDorsiflexion.place(x=400,y=535,height=20,width=100)
         RightAnklePlantarDorsiflexion = tk.Entry(self,justify='center')
-        RightAnklePlantarDorsiflexion.place(x=550,y=565,height=20,width=100)
+        RightAnklePlantarDorsiflexion.place(x=550,y=535,height=20,width=100)
         
         AnkleIntExtRotationLabel = tk.Label(self, text='Ankle Int/Ext Rotation', font=Small_Font, anchor='e') 
-        AnkleIntExtRotationLabel.place(x=100,y=588,width=290)
+        AnkleIntExtRotationLabel.place(x=100,y=558,width=290)
         LeftAnkleIntExtRotation = tk.Entry(self,justify='center')
-        LeftAnkleIntExtRotation.place(x=400,y=590,height=20,width=100)
+        LeftAnkleIntExtRotation.place(x=400,y=560,height=20,width=100)
         RightAnkleIntExtRotation = tk.Entry(self,justify='center')
-        RightAnkleIntExtRotation.place(x=550,y=590,height=20,width=100)
+        RightAnkleIntExtRotation.place(x=550,y=560,height=20,width=100)
+        
+        AnkleProgressionLabel = tk.Label(self, text='Ankle Progression', font=Small_Font, anchor='e') 
+        AnkleProgressionLabel.place(x=100,y=583,width=290)
+        LeftAnkleProgression = tk.Entry(self,justify='center')
+        LeftAnkleProgression.place(x=400,y=585,height=20,width=100)
+        RightAnkleProgression = tk.Entry(self,justify='center')
+        RightAnkleProgression.place(x=550,y=585,height=20,width=100)
         
         FootProgressionLabel = tk.Label(self, text='Foot Progression', font=Small_Font, anchor='e') 
-        FootProgressionLabel.place(x=100,y=613,width=290)
+        FootProgressionLabel.place(x=100,y=608,width=290)
         LeftFootProgression = tk.Entry(self,justify='center')
-        LeftFootProgression.place(x=400,y=615,height=20,width=100)
+        LeftFootProgression.place(x=400,y=610,height=20,width=100)
         RightFootProgression = tk.Entry(self,justify='center')
-        RightFootProgression.place(x=550,y=615,height=20,width=100)
+        RightFootProgression.place(x=550,y=610,height=20,width=100)
         
         # Foot Posture
         SectionCanvas.create_rectangle(40, 650, 660, 860, outline = 'grey')
@@ -1716,12 +1773,17 @@ class StaticSubjectCalibrationReport_Page(tk.Frame):
         RightForefootProgression = tk.Entry(self,justify='center')
         RightForefootProgression.place(x=550,y=780,height=20,width=100)
         
-        MidfootAbAdductionLabel = tk.Label(self, text='Midfoot Complex Ab/Adduction', font=Small_Font, anchor='e') 
+        MidfootAbAdductionLabel = tk.Label(self, text='Midfoot Complex Ab/Adduction [TOR,ROT]', font=Small_Font, anchor='e') 
         MidfootAbAdductionLabel.place(x=100,y=803,width=290)
         LeftMidfootAbAdduction = tk.Entry(self,justify='center')
-        LeftMidfootAbAdduction.place(x=400,y=805,height=20,width=100)
+        LeftMidfootAbAdduction.place(x=400,y=805,height=20,width=48)
         RightMidfootAbAdduction = tk.Entry(self,justify='center')
-        RightMidfootAbAdduction.place(x=550,y=805,height=20,width=100)
+        RightMidfootAbAdduction.place(x=550,y=805,height=20,width=48)
+        
+        LeftMidfootAbAdductionROT = tk.Entry(self,justify='center')
+        LeftMidfootAbAdductionROT.place(x=450,y=805,height=20,width=48)
+        RightMidfootAbAdductionROT = tk.Entry(self,justify='center')
+        RightMidfootAbAdductionROT.place(x=600,y=805,height=20,width=48)
         
         
         HalluxProgressionLabel = tk.Label(self, text='MTP1 Varus/Valgus', font=Small_Font, anchor='e') 
@@ -1789,9 +1851,27 @@ class StaticSubjectCalibrationReport_Page(tk.Frame):
                                                    self.Right23MetatarsalBaseMarkerName, self.Right23MetatarsalHeadMarkerName,\
                                                    self.RightFirstMetatarsalMedialBaseMarkerName, self.RightFirstMetatarsalMedialHeadMarkerName,\
                                                    self.RightCalcanealPeronealTrochleaMarkerName, self.RightFirstMetatarsoPhalangealJointMarkerName]
+                # Anatomical markers optioal if X-ray measures are used.
+                if not self.valueLeftCalcanealPitch == '': 
+                    ExcludedForErrorMarkerNames.append(self.LeftCalcanealPeronealTrochleaMarkerName)
+                if not self.valueRightCalcanealPitch == '': 
+                    ExcludedForErrorMarkerNames.append(self.RightCalcanealPeronealTrochleaMarkerName)
+                if not self.valueLeftForefootProgression_reltoBiMal == '': 
+                    ExcludedForErrorMarkerNames.append(self.Left23MetatarsalBaseMarkerName)
+                    ExcludedForErrorMarkerNames.append(self.Left23MetatarsalHeadMarkerName)
+                if not self.valueRightForefootProgression_reltoBiMal == '': 
+                    ExcludedForErrorMarkerNames.append(self.Right23MetatarsalBaseMarkerName)
+                    ExcludedForErrorMarkerNames.append(self.Right23MetatarsalHeadMarkerName)
+                if not self.valueLeftFirstMetatarsalPitch == '':
+                    ExcludedForErrorMarkerNames.append(self.LeftFirstMetatarsalMedialBaseMarkerName)
+                    ExcludedForErrorMarkerNames.append(self.LeftFirstMetatarsalMedialHeadMarkerName)
+                if not self.valueRightFirstMetatarsalPitch == '':
+                    ExcludedForErrorMarkerNames.append(self.RightFirstMetatarsalMedialBaseMarkerName)
+                    ExcludedForErrorMarkerNames.append(self.RightFirstMetatarsalMedialHeadMarkerName)
+                
                 if not MarkerName in ExcludedForErrorMarkerNames: 
-                    ErrorMessagesLabel.place(x=50,y=100, width=130,height=85)
-                    ErrorMessagesText.place(x=195,y=95,width=490,height=85)
+                    ErrorMessagesLabel.place(x=20,y=50, width=150,height=85)
+                    ErrorMessagesText.place(x=195,y=50,width=490,height=100)
                     ErrorMessage = 'Marker ' + MarkerName + ' is not Found ' + '\n'
                     ErrorMessagesText.insert(tk.END,ErrorMessage)
             return MarkerData    
@@ -1980,9 +2060,13 @@ class StaticSubjectCalibrationReport_Page(tk.Frame):
             [LeftHipCenterPelvis, LeftHipCenterLab] = gait.JointCenterModel_Hip_Harrington('Left', self.valueASISdist, RightASISMarker, LeftASISMarker, SacralMarker, EPelvisTech, MidASISLab)
             [RightHipCenterPelvis, RightHipCenterLab] = gait.JointCenterModel_Hip_Harrington('Right', self.valueASISdist, RightASISMarker, LeftASISMarker, SacralMarker, EPelvisTech, MidASISLab)
         if self.HipModelName == 'Harrington2':
-            # Harrington Hip Model- 2 variable
+            # Harrington Hip Model- Uses Leg Length variable
             [LeftHipCenterPelvis, LeftHipCenterLab] = gait.JointCenterModel_Hip_Harrington2('Left', self.valueASISdist, self.valueLeftLegLength, self.valueRightLegLength, RightASISMarker, LeftASISMarker, SacralMarker, EPelvisTech, MidASISLab)
             [RightHipCenterPelvis, RightHipCenterLab] = gait.JointCenterModel_Hip_Harrington2('Right', self.valueASISdist, self.valueLeftLegLength, self.valueRightLegLength, RightASISMarker, LeftASISMarker, SacralMarker, EPelvisTech, MidASISLab)
+        if self.HipModelName == 'HarringtonHybrid':
+            # Harrington Hip Model- Uses Left Length for SI position and only PW for ML position
+            [LeftHipCenterPelvis, LeftHipCenterLab] = gait.JointCenterModel_Hip_HarringtonHybrid('Left', self.valueASISdist, self.valueLeftLegLength, self.valueRightLegLength, RightASISMarker, LeftASISMarker, SacralMarker, EPelvisTech, MidASISLab)
+            [RightHipCenterPelvis, RightHipCenterLab] = gait.JointCenterModel_Hip_HarringtonHybrid('Right', self.valueASISdist, self.valueLeftLegLength, self.valueRightLegLength, RightASISMarker, LeftASISMarker, SacralMarker, EPelvisTech, MidASISLab)
         #print(LeftHipCenterPelvis)
         #print(LeftHipCenterLab)
         #print(RightHipCenterPelvis)
@@ -2148,10 +2232,10 @@ class StaticSubjectCalibrationReport_Page(tk.Frame):
                 LeftEHalluxAnat = math.TransformAnatCoorSysFromTechCoors(self.valueLeftEHalluxAnatRelTech, LeftEHalluxTech)
                 exec(open(StaticDataFileName).read())
             else:    
-                LeftEHindfootAnat = gait.AnatCS_Hindfoot_mSHCG('Left', LeftLateralCalcaneusMarker, LeftMedialCalcaneusMarker, LeftPosteriorCalcaneusMarker, 
-                                                               LeftCalcanealPeronealTrochleaMarker, self.valueLeftHindfootVarus, self.valueLeftCalcanealPitch,self.valueLeftHindfootProgression,self.HindfootValgusIsNegative)
-                LeftEForefootAnat = gait.AnatCS_Forefoot_mSHCG('Left', Left23MetatarsalBaseMarker, Left23MetatarsalHeadMarker, LeftFirstMetatarsalMedialBaseMarker,
-                                                               LeftFirstMetatarsalMedialHeadMarker, self.valueLeftFirstMetatarsalPitch)
+                LeftEHindfootAnat = gait.AnatCS_Hindfoot_mSHCG('Left', LeftLateralCalcaneusMarker, LeftMedialCalcaneusMarker, LeftPosteriorCalcaneusMarker, LeftCalcanealPeronealTrochleaMarker, LeftLateralAnkleMarker, LeftMedialAnkleMarker, 
+                                                                self.valueLeftHindfootVarus, self.valueLeftCalcanealPitch,self.valueLeftHindfootProgression_reltoBiMal,self.HindfootValgusIsNegative)
+                LeftEForefootAnat = gait.AnatCS_Forefoot_mSHCG('Left', Left23MetatarsalBaseMarker, Left23MetatarsalHeadMarker, LeftFirstMetatarsalMedialBaseMarker, LeftFirstMetatarsalMedialHeadMarker, LeftLateralAnkleMarker, LeftMedialAnkleMarker, 
+                                                                self.valueLeftFirstMetatarsalPitch,self.valueLeftForefootProgression_reltoBiMal)
                 LeftEHalluxAnat = LeftEHalluxTech
             #print(LeftEHindfootAnat)
             #print(LeftEForefootAnat)
@@ -2166,10 +2250,10 @@ class StaticSubjectCalibrationReport_Page(tk.Frame):
                 RightEHalluxAnat = math.TransformAnatCoorSysFromTechCoors(self.valueRightEHalluxAnatRelTech, RightEHalluxTech)
                 exec(open(StaticDataFileName).read())
             else:
-                RightEHindfootAnat = gait.AnatCS_Hindfoot_mSHCG('Right', RightLateralCalcaneusMarker, RightMedialCalcaneusMarker, RightPosteriorCalcaneusMarker, 
-                                                               RightCalcanealPeronealTrochleaMarker, self.valueRightHindfootVarus, self.valueRightCalcanealPitch,self.valueRightHindfootProgression,self.HindfootValgusIsNegative)
-                RightEForefootAnat = gait.AnatCS_Forefoot_mSHCG('Right', Right23MetatarsalBaseMarker, Right23MetatarsalHeadMarker, RightFirstMetatarsalMedialBaseMarker,
-                                                               RightFirstMetatarsalMedialHeadMarker, self.valueRightFirstMetatarsalPitch)
+                RightEHindfootAnat = gait.AnatCS_Hindfoot_mSHCG('Right', RightLateralCalcaneusMarker, RightMedialCalcaneusMarker, RightPosteriorCalcaneusMarker, RightCalcanealPeronealTrochleaMarker, RightLateralAnkleMarker, RightMedialAnkleMarker, 
+                                                                 self.valueRightHindfootVarus, self.valueRightCalcanealPitch,self.valueRightHindfootProgression_reltoBiMal,self.HindfootValgusIsNegative)
+                RightEForefootAnat = gait.AnatCS_Forefoot_mSHCG('Right', Right23MetatarsalBaseMarker, Right23MetatarsalHeadMarker, RightFirstMetatarsalMedialBaseMarker, RightFirstMetatarsalMedialHeadMarker, RightLateralAnkleMarker, RightMedialAnkleMarker, 
+                                                                 self.valueRightFirstMetatarsalPitch,self.valueRightForefootProgression_reltoBiMal)
                 RightEHalluxAnat = RightEHalluxTech
             #print(RightEHindfootAnat)
             #print(RightEForefootAnat)
@@ -2264,6 +2348,7 @@ class StaticSubjectCalibrationReport_Page(tk.Frame):
             LeftHalluxAnglesRad   = math.EulerAngles_YXZ(LeftEHalluxAnat,ELab)
             LeftAnkleComplexAnglesRad = math.EulerAngles_YXZ(LeftEHindfootAnat,LeftEShankDistalAnat)
             LeftMidfootAnglesRad = math.EulerAngles_YXZ(LeftEForefootAnat,LeftEHindfootAnat)
+            LeftMidfootAnglesROTRad = math.EulerAngles_ZXY(LeftEForefootAnat,LeftEHindfootAnat)
             LeftToesAnglesRad = math.EulerAngles_YXZ(LeftEHalluxAnat,LeftEForefootAnat)
             #print LeftHindfootAnglesRad
             #print LeftForefootAnglesRad
@@ -2280,6 +2365,7 @@ class StaticSubjectCalibrationReport_Page(tk.Frame):
             RightHalluxAnglesRad   = math.EulerAngles_YXZ(RightEHalluxAnat,ELab)
             RightAnkleComplexAnglesRad = math.EulerAngles_YXZ(RightEHindfootAnat,RightEShankDistalAnat)
             RightMidfootAnglesRad = math.EulerAngles_YXZ(RightEForefootAnat,RightEHindfootAnat)
+            RightMidfootAnglesROTRad = math.EulerAngles_ZXY(RightEForefootAnat,RightEHindfootAnat)
             RightToesAnglesRad = math.EulerAngles_YXZ(RightEHalluxAnat,RightEForefootAnat)
             #print RightHindfootAnglesRad
             #print RightForefootAnglesRad
@@ -2322,7 +2408,8 @@ class StaticSubjectCalibrationReport_Page(tk.Frame):
             LeftForefootAnglesDeg = T1.dot(LeftForefootAnglesRad) * 180 / np.pi 
             LeftHalluxAnglesDeg   = T1.dot(LeftHalluxAnglesRad) * 180 / np.pi 
             LeftAnkleComplexAnglesDeg = T2.dot(LeftAnkleComplexAnglesRad) * 180 / np.pi 
-            LeftMidfootAnglesDeg = T2.dot(LeftMidfootAnglesRad) * 180 / np.pi 
+            LeftMidfootAnglesDeg = T2.dot(LeftMidfootAnglesRad) * 180 / np.pi
+            LeftMidfootAnglesROTDeg = T2.dot(LeftMidfootAnglesROTRad) * 180 / np.pi
             LeftToesAnglesDeg = T2.dot(LeftToesAnglesRad) * 180 / np.pi 
         #print(LeftTrunkAnglesDeg)
         #print(LeftPelvisAnglesDeg)
@@ -2353,6 +2440,7 @@ class StaticSubjectCalibrationReport_Page(tk.Frame):
             RightHalluxAnglesDeg   = T1.dot(RightHalluxAnglesRad) * 180 / np.pi 
             RightAnkleComplexAnglesDeg = T2.dot(RightAnkleComplexAnglesRad) * 180 / np.pi 
             RightMidfootAnglesDeg = T2.dot(RightMidfootAnglesRad) * 180 / np.pi 
+            RightMidfootAnglesROTDeg = T2.dot(RightMidfootAnglesROTRad) * 180 / np.pi 
             RightToesAnglesDeg = T2.dot(RightToesAnglesRad) * 180 / np.pi 
         #print(RightTrunkAnglesDeg)
         #print(RightPelvisAnglesDeg)
@@ -2487,7 +2575,14 @@ class StaticSubjectCalibrationReport_Page(tk.Frame):
             LeftAnkleIntExtRotation.insert(0, str(int(abs(round(LeftAnkleAnglesDeg[2], 0)))) +  " Ext")
         if round(LeftAnkleAnglesDeg[2], 0) == 0:
             LeftAnkleIntExtRotation.insert(0, str(int(abs(round(LeftAnkleAnglesDeg[2], 0)))) +  "")
-
+        
+        if round(LeftShankAnglesDeg[2], 0) > 0:
+            LeftAnkleProgression.insert(0, str(int(abs(round(LeftShankAnglesDeg[2], 0)))) +  " Int")
+        if round(LeftShankAnglesDeg[2], 0) < 0:
+            LeftAnkleProgression.insert(0, str(int(abs(round(LeftShankAnglesDeg[2], 0)))) +  " Ext")
+        if round(LeftShankAnglesDeg[2], 0) == 0:
+            LeftAnkleProgression.insert(0, str(int(abs(round(LeftShankAnglesDeg[2], 0)))) +  "")
+        
         if round(LeftFootAnglesDeg[2], 0) > 0:
             LeftFootProgression.insert(0, str(int(abs(round(LeftFootAnglesDeg[2], 0)))) +  " Int")
         if round(LeftFootAnglesDeg[2], 0) < 0:
@@ -2548,14 +2643,20 @@ class StaticSubjectCalibrationReport_Page(tk.Frame):
             if round(LeftForefootAnglesDeg[2], 0) == 0:
                 LeftForefootProgression.insert(0, str(int(abs(round(LeftForefootAnglesDeg[2], 0)))) +  "")
  
-    
-            if round(LeftForefootAnglesDeg[2] - LeftHindfootAnglesDeg[2], 0) > 0:
-                LeftMidfootAbAdduction.insert(0, str(int(abs(round(LeftForefootAnglesDeg[2] - LeftHindfootAnglesDeg[2], 0)))) +  " Add")
-            if round(LeftForefootAnglesDeg[2] - LeftHindfootAnglesDeg[2], 0) < 0:
-                LeftMidfootAbAdduction.insert(0, str(int(abs(round(LeftForefootAnglesDeg[2] - LeftHindfootAnglesDeg[2], 0)))) +  " Abd")
-            if round(LeftForefootAnglesDeg[2] - LeftHindfootAnglesDeg[2], 0) == 0:
-                LeftMidfootAbAdduction.insert(0, str(int(abs(round(LeftForefootAnglesDeg[2] - LeftHindfootAnglesDeg[2], 0)))) +  "")
-                
+            if round(LeftMidfootAnglesDeg[2], 0) > 0:
+                LeftMidfootAbAdduction.insert(0, str(int(abs(round(LeftMidfootAnglesDeg[2], 0)))) +  " Add")
+            if round(LeftMidfootAnglesDeg[2], 0) < 0:
+                LeftMidfootAbAdduction.insert(0, str(int(abs(round(LeftMidfootAnglesDeg[2], 0)))) +  " Abd")
+            if round(LeftMidfootAnglesDeg[2], 0) == 0:
+                LeftMidfootAbAdduction.insert(0, str(int(abs(round(LeftMidfootAnglesDeg[2], 0)))) +  "")
+            
+            if round(LeftMidfootAnglesROTDeg[2], 0) > 0:
+                LeftMidfootAbAdductionROT.insert(0, str(int(abs(round(LeftMidfootAnglesROTDeg[2], 0)))) +  " Add")
+            if round(LeftMidfootAnglesROTDeg[2], 0) < 0:
+                LeftMidfootAbAdductionROT.insert(0, str(int(abs(round(LeftMidfootAnglesROTDeg[2], 0)))) +  " Abd")
+            if round(LeftMidfootAnglesROTDeg[2], 0) == 0:
+                LeftMidfootAbAdductionROT.insert(0, str(int(abs(round(LeftMidfootAnglesROTDeg[2], 0)))) +  "")
+            
             if round(LeftHalluxAnglesDeg[2], 0) > 0:
                 LeftHalluxProgression.insert(0, str(int(abs(round(LeftToesAnglesDeg[2], 0)))) +  " Var")
             if round(LeftHalluxAnglesDeg[2], 0) < 0:
@@ -2660,7 +2761,14 @@ class StaticSubjectCalibrationReport_Page(tk.Frame):
             RightAnkleIntExtRotation.insert(0, str(int(abs(round(RightAnkleAnglesDeg[2], 0)))) +  " Ext")
         if round(RightAnkleAnglesDeg[2], 0) == 0:
             RightAnkleIntExtRotation.insert(0, str(int(abs(round(RightAnkleAnglesDeg[2], 0)))) +  "")
-
+        
+        if round(RightShankAnglesDeg[2], 0) > 0:
+            RightAnkleProgression.insert(0, str(int(abs(round(RightShankAnglesDeg[2], 0)))) +  " Int")
+        if round(RightShankAnglesDeg[2], 0) < 0:
+            RightAnkleProgression.insert(0, str(int(abs(round(RightShankAnglesDeg[2], 0)))) +  " Ext")
+        if round(RightShankAnglesDeg[2], 0) == 0:
+            RightAnkleProgression.insert(0, str(int(abs(round(RightShankAnglesDeg[2], 0)))) +  "")
+            
         if round(RightFootAnglesDeg[2], 0) > 0:
             RightFootProgression.insert(0, str(int(abs(round(RightFootAnglesDeg[2], 0)))) +  " Int")
         if round(RightFootAnglesDeg[2], 0) < 0:
@@ -2720,14 +2828,21 @@ class StaticSubjectCalibrationReport_Page(tk.Frame):
                 RightForefootProgression.insert(0, str(int(abs(round(RightForefootAnglesDeg[2], 0)))) +  " Ext")
             if round(RightForefootAnglesDeg[2], 0) == 0:
                 RightForefootProgression.insert(0, str(int(abs(round(RightForefootAnglesDeg[2], 0)))) +  "")
+            
+            if round(RightMidfootAnglesDeg[2], 0) > 0:
+                RightMidfootAbAdduction.insert(0, str(int(abs(round(RightMidfootAnglesDeg[2], 0)))) +  " Add")
+            if round(RightMidfootAnglesDeg[2], 0) < 0:
+                RightMidfootAbAdduction.insert(0, str(int(abs(round(RightMidfootAnglesDeg[2], 0)))) +  " Abd")
+            if round(RightMidfootAnglesDeg[2], 0) == 0:
+                RightMidfootAbAdduction.insert(0, str(int(abs(round(RightMidfootAnglesDeg[2], 0)))) +  "")
+            
+            if round(RightMidfootAnglesROTDeg[2], 0) > 0:
+                RightMidfootAbAdductionROT.insert(0, str(int(abs(round(RightMidfootAnglesROTDeg[2], 0)))) +  " Add")
+            if round(RightMidfootAnglesROTDeg[2], 0) < 0:
+                RightMidfootAbAdductionROT.insert(0, str(int(abs(round(RightMidfootAnglesROTDeg[2], 0)))) +  " Abd")
+            if round(RightMidfootAnglesROTDeg[2], 0) == 0:
+                RightMidfootAbAdductionROT.insert(0, str(int(abs(round(RightMidfootAnglesROTDeg[2], 0)))) +  "")
                 
-            if round(RightForefootAnglesDeg[2] - RightHindfootAnglesDeg[2], 0) > 0:
-                RightMidfootAbAdduction.insert(0, str(int(abs(round(RightForefootAnglesDeg[2] - RightHindfootAnglesDeg[2], 0)))) +  " Add")
-            if round(RightForefootAnglesDeg[2] - RightHindfootAnglesDeg[2], 0) < 0:
-                RightMidfootAbAdduction.insert(0, str(int(abs(round(RightForefootAnglesDeg[2] - RightHindfootAnglesDeg[2], 0)))) +  " Abd")
-            if round(RightForefootAnglesDeg[2] - RightHindfootAnglesDeg[2], 0) == 0:
-                RightMidfootAbAdduction.insert(0, str(int(abs(round(RightForefootAnglesDeg[2] - RightHindfootAnglesDeg[2], 0)))) +  "")
- 
             if round(RightHalluxAnglesDeg[2], 0) > 0:
                 RightHalluxProgression.insert(0, str(int(abs(round(RightToesAnglesDeg[2], 0)))) +  " Var")
             if round(RightHalluxAnglesDeg[2], 0) < 0:
@@ -3054,9 +3169,14 @@ class StaticSubjectCalibrationReport_Page(tk.Frame):
                     [LeftHipCenterPelvis, LeftHipCenterLab] = gait.JointCenterModel_Hip_Harrington('Left', self.valueASISdist, RightASISMarker, LeftASISMarker, SacralMarker, EPelvisTech, MidASISLab)
                     [RightHipCenterPelvis, RightHipCenterLab] = gait.JointCenterModel_Hip_Harrington('Right', self.valueASISdist, RightASISMarker, LeftASISMarker, SacralMarker, EPelvisTech, MidASISLab)
                 if self.HipModelName == 'Harrington2':
-                    # Harrington Hip Model- 2 variable
+                    # Harrington Hip Model- Uses Leg Length variable
                     [LeftHipCenterPelvis, LeftHipCenterLab] = gait.JointCenterModel_Hip_Harrington2('Left', self.valueASISdist, self.valueLeftLegLength, self.valueRightLegLength, RightASISMarker, LeftASISMarker, SacralMarker, EPelvisTech, MidASISLab)
                     [RightHipCenterPelvis, RightHipCenterLab] = gait.JointCenterModel_Hip_Harrington2('Right', self.valueASISdist, self.valueLeftLegLength, self.valueRightLegLength, RightASISMarker, LeftASISMarker, SacralMarker, EPelvisTech, MidASISLab)
+                if self.HipModelName == 'HarringtonHybrid':
+                    # Harrington Hip Model- Uses Leg Length for SI position, PW for ML position
+                    [LeftHipCenterPelvis, LeftHipCenterLab] = gait.JointCenterModel_Hip_HarringtonHybrid('Left', self.valueASISdist, self.valueLeftLegLength, self.valueRightLegLength, RightASISMarker, LeftASISMarker, SacralMarker, EPelvisTech, MidASISLab)
+                    [RightHipCenterPelvis, RightHipCenterLab] = gait.JointCenterModel_Hip_HarringtonHybrid('Right', self.valueASISdist, self.valueLeftLegLength, self.valueRightLegLength, RightASISMarker, LeftASISMarker, SacralMarker, EPelvisTech, MidASISLab)
+                
                 
                 if self.valueKneeAlignmentCheck == '0':
                     #Compute Location of Virtual Knee Marker (based on cluster-type knee fixture)
@@ -3263,7 +3383,7 @@ class StaticSubjectCalibrationReport_Page(tk.Frame):
             StaticResultsPage.drawString(WidthMargin, PageHeight - HeightMargin -VerticalOffsetFromTitle, "Standing Posture (degrees)")
             StaticResultsPage.drawString(WidthMargin + LeftColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle, "Left")
             StaticResultsPage.drawString(WidthMargin + RightColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle, "Right")
-            StaticResultsPage.rect(WidthMargin -5 , PageHeight - HeightMargin -VerticalOffsetFromTitle + 15, DrawRegionWidth + 5, -(17*LineSpacing + 5),stroke = 1, fill = 0)
+            StaticResultsPage.rect(WidthMargin -5 , PageHeight - HeightMargin -VerticalOffsetFromTitle + 15, DrawRegionWidth + 5, -(18*LineSpacing + 5),stroke = 1, fill = 0)
             
             StaticResultsPage.setFont("Times-Roman", 11)
             StaticResultsPage.drawRightString(WidthMargin + LabelColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle - 1 * LineSpacing ,"Trunk Obliquity")
@@ -3280,8 +3400,9 @@ class StaticSubjectCalibrationReport_Page(tk.Frame):
             StaticResultsPage.drawRightString(WidthMargin + LabelColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle -12 * LineSpacing ,"Knee Int/External Rotation")
             StaticResultsPage.drawRightString(WidthMargin + LabelColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle -13 * LineSpacing ,"Knee Progression")
             StaticResultsPage.drawRightString(WidthMargin + LabelColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle -14 * LineSpacing ,"Ankle Plantar/Dorsiflexion")
-            StaticResultsPage.drawRightString(WidthMargin + LabelColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle -15 * LineSpacing ,"Foot Int/External Rotation")
-            StaticResultsPage.drawRightString(WidthMargin + LabelColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle -16 * LineSpacing ,"Foot Progression")
+            StaticResultsPage.drawRightString(WidthMargin + LabelColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle -15 * LineSpacing ,"Ankle Int/External Rotation")
+            StaticResultsPage.drawRightString(WidthMargin + LabelColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle -16 * LineSpacing ,"Ankle Progression")
+            StaticResultsPage.drawRightString(WidthMargin + LabelColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle -17 * LineSpacing ,"Foot Progression")
 
             # Static Posture- Left Values
             if len(str.split(LeftTrunkObliquity.get())) > 0:
@@ -3314,8 +3435,10 @@ class StaticSubjectCalibrationReport_Page(tk.Frame):
                 StaticResultsPage.drawRightString(WidthMargin + LeftColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle -14 * LineSpacing ,str.split(LeftAnklePlantarDorsiflexion.get())[0])
             if len(str.split(LeftAnkleIntExtRotation.get())) > 0:
                 StaticResultsPage.drawRightString(WidthMargin + LeftColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle -15 * LineSpacing ,str.split(LeftAnkleIntExtRotation.get())[0])
+            if len(str.split(LeftAnkleProgression.get())) > 0:
+                StaticResultsPage.drawRightString(WidthMargin + LeftColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle -16 * LineSpacing ,str.split(LeftAnkleProgression.get())[0])
             if len(str.split(LeftFootProgression.get())) > 0:
-                StaticResultsPage.drawRightString(WidthMargin + LeftColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle -16 * LineSpacing ,str.split(LeftFootProgression.get())[0])
+                StaticResultsPage.drawRightString(WidthMargin + LeftColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle -17 * LineSpacing ,str.split(LeftFootProgression.get())[0])
             # Static Posture- Left Direction
             if len(str.split(LeftTrunkObliquity.get())) > 1:
                 StaticResultsPage.drawString(WidthMargin + LeftColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle - 1 * LineSpacing , '  ' + str.split(LeftTrunkObliquity.get())[1])
@@ -3347,8 +3470,10 @@ class StaticSubjectCalibrationReport_Page(tk.Frame):
                 StaticResultsPage.drawString(WidthMargin + LeftColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle -14 * LineSpacing , '  ' + str.split(LeftAnklePlantarDorsiflexion.get())[1])
             if len(str.split(LeftAnkleIntExtRotation.get())) > 1:
                 StaticResultsPage.drawString(WidthMargin + LeftColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle -15 * LineSpacing , '  ' + str.split(LeftAnkleIntExtRotation.get())[1])
+            if len(str.split(LeftAnkleProgression.get())) > 1:
+                StaticResultsPage.drawString(WidthMargin + LeftColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle -16 * LineSpacing , '  ' + str.split(LeftAnkleProgression.get())[1])
             if len(str.split(LeftFootProgression.get())) > 1:
-                StaticResultsPage.drawString(WidthMargin + LeftColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle -16 * LineSpacing , '  ' + str.split(LeftFootProgression.get())[1])
+                StaticResultsPage.drawString(WidthMargin + LeftColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle -17 * LineSpacing , '  ' + str.split(LeftFootProgression.get())[1])
             
             
             # Static Posture- Right Values
@@ -3382,8 +3507,10 @@ class StaticSubjectCalibrationReport_Page(tk.Frame):
                 StaticResultsPage.drawRightString(WidthMargin + RightColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle -14 * LineSpacing ,str.split(RightAnklePlantarDorsiflexion.get())[0])
             if len(str.split(RightAnkleIntExtRotation.get())) > 0:
                 StaticResultsPage.drawRightString(WidthMargin + RightColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle -15 * LineSpacing ,str.split(RightAnkleIntExtRotation.get())[0])
+            if len(str.split(RightAnkleProgression.get())) > 0:
+                StaticResultsPage.drawRightString(WidthMargin + RightColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle -16 * LineSpacing ,str.split(RightAnkleProgression.get())[0])
             if len(str.split(RightFootProgression.get())) > 0:
-                StaticResultsPage.drawRightString(WidthMargin + RightColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle -16 * LineSpacing ,str.split(RightFootProgression.get())[0])
+                StaticResultsPage.drawRightString(WidthMargin + RightColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle -17 * LineSpacing ,str.split(RightFootProgression.get())[0])
             
             # Static Posture- Right Direction
             if len(str.split(RightTrunkObliquity.get())) > 1:
@@ -3416,12 +3543,14 @@ class StaticSubjectCalibrationReport_Page(tk.Frame):
                 StaticResultsPage.drawString(WidthMargin + RightColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle -14 * LineSpacing , '  ' + str.split(RightAnklePlantarDorsiflexion.get())[1])
             if len(str.split(RightAnkleIntExtRotation.get())) > 1:
                 StaticResultsPage.drawString(WidthMargin + RightColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle -15 * LineSpacing , '  ' + str.split(RightAnkleIntExtRotation.get())[1])
+            if len(str.split(RightAnkleProgression.get())) > 1:
+                StaticResultsPage.drawString(WidthMargin + RightColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle -16 * LineSpacing , '  ' + str.split(RightAnkleProgression.get())[1])
             if len(str.split(RightFootProgression.get())) > 1:
-                StaticResultsPage.drawString(WidthMargin + RightColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle -16 * LineSpacing , '  ' + str.split(RightFootProgression.get())[1])
+                StaticResultsPage.drawString(WidthMargin + RightColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle -17 * LineSpacing , '  ' + str.split(RightFootProgression.get())[1])
             
             # Tibial Torsion
             StaticResultsPage.setFont("Times-Bold", 12)
-            VerticalOffsetFromTitle = 430
+            VerticalOffsetFromTitle = 450
             StaticResultsPage.drawString(WidthMargin, PageHeight - HeightMargin -VerticalOffsetFromTitle, "Tibial Torsion (degrees)")
             StaticResultsPage.rect(WidthMargin -5 , PageHeight - HeightMargin -VerticalOffsetFromTitle + 15, DrawRegionWidth + 5, -(1*LineSpacing + 5),stroke = 1, fill = 0)
             
@@ -3481,7 +3610,7 @@ class StaticSubjectCalibrationReport_Page(tk.Frame):
 
             # QA Report- Clinical vs. Marker
             StaticResultsPage.setFont("Times-Bold", 12)
-            VerticalOffsetFromTitle = 460
+            VerticalOffsetFromTitle = 490
             LabelColumnSpacing = 150
             LeftColumnSpacing = 200
             RightColumnSpacing = 300
@@ -3598,7 +3727,7 @@ class StaticSubjectCalibrationReport_Page(tk.Frame):
                 StaticResultsPage.rect(WidthMargin,HeightMargin + DrawRegionHeight,DrawRegionWidth,-30,stroke = 0, fill = 1)
                 StaticResultsPage.setFont("Times-Bold", 12)
                 StaticResultsPage.setFillGray(0.0)
-                StaticResultsPage.drawCentredString(PageWidth/2,PageHeight - HeightMargin - 12,"Shriners Hospital for Children- Greenville, SC")
+                StaticResultsPage.drawCentredString(PageWidth/2,PageHeight - HeightMargin - 12,"Shriners Hospital for Children")
                 StaticResultsPage.drawCentredString(PageWidth/2,PageHeight - HeightMargin - 25,"Motion Analysis Center")
                 StaticResultsPage.drawCentredString(PageWidth/2,PageHeight - HeightMargin - 50,"-Static Report-")
                 
@@ -3606,13 +3735,13 @@ class StaticSubjectCalibrationReport_Page(tk.Frame):
                 StaticResultsPage.setFont("Times-Bold", 12)
                 StaticResultsPage.setStrokeGray(0.75)
                 VerticalOffsetFromTitle = 80
-                LabelColumnSpacing = 150
-                LeftColumnSpacing = 200
-                RightColumnSpacing = 300
+                LabelColumnSpacing = 200
+                LeftColumnSpacing = 250
+                RightColumnSpacing = 350
                 StaticResultsPage.drawString(WidthMargin, PageHeight - HeightMargin -VerticalOffsetFromTitle, "Foot Posture (degrees)")
                 StaticResultsPage.drawString(WidthMargin + LeftColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle, "Left")
                 StaticResultsPage.drawString(WidthMargin + RightColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle, "Right")
-                StaticResultsPage.rect(WidthMargin -5 , PageHeight - HeightMargin -VerticalOffsetFromTitle + 15, DrawRegionWidth + 5, -(9*LineSpacing + 5),stroke = 1, fill = 0)
+                StaticResultsPage.rect(WidthMargin -5 , PageHeight - HeightMargin -VerticalOffsetFromTitle + 15, DrawRegionWidth + 5, -(10*LineSpacing + 5),stroke = 1, fill = 0)
                 
                 StaticResultsPage.setFont("Times-Roman", 11)
                 StaticResultsPage.drawRightString(WidthMargin + LabelColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle - 1 * LineSpacing ,"Hindfoot Pitch")
@@ -3621,8 +3750,9 @@ class StaticSubjectCalibrationReport_Page(tk.Frame):
                 StaticResultsPage.drawRightString(WidthMargin + LabelColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle - 4 * LineSpacing ,"Ankle Complex Varus/Valgus")
                 StaticResultsPage.drawRightString(WidthMargin + LabelColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle - 5 * LineSpacing ,"Forefoot Pitch")
                 StaticResultsPage.drawRightString(WidthMargin + LabelColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle - 6 * LineSpacing ,"Forefoot Progression")
-                StaticResultsPage.drawRightString(WidthMargin + LabelColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle - 7 * LineSpacing ,"Midfoot Complex Ab/Adduction")
-                StaticResultsPage.drawRightString(WidthMargin + LabelColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle - 8 * LineSpacing ,"MTP1 Varus/Valgus")
+                StaticResultsPage.drawRightString(WidthMargin + LabelColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle - 7 * LineSpacing ,"Midfoot Complex Ab/Adduction [TOR]")
+                StaticResultsPage.drawRightString(WidthMargin + LabelColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle - 8 * LineSpacing ,"Midfoot Complex Ab/Adduction [ROT]")
+                StaticResultsPage.drawRightString(WidthMargin + LabelColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle - 9 * LineSpacing ,"MTP1 Varus/Valgus")
     
             
                 # Static Posture- Left Values
@@ -3640,9 +3770,11 @@ class StaticSubjectCalibrationReport_Page(tk.Frame):
                     StaticResultsPage.drawRightString(WidthMargin + LeftColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle - 6 * LineSpacing ,str.split(LeftForefootProgression.get())[0])
                 if len(str.split(LeftMidfootAbAdduction.get())) > 0:
                     StaticResultsPage.drawRightString(WidthMargin + LeftColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle - 7 * LineSpacing ,str.split(LeftMidfootAbAdduction.get())[0])
+                if len(str.split(LeftMidfootAbAdductionROT.get())) > 0:
+                    StaticResultsPage.drawRightString(WidthMargin + LeftColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle - 8 * LineSpacing ,str.split(LeftMidfootAbAdductionROT.get())[0])
                 if len(str.split(LeftHalluxProgression.get())) > 0:
-                    StaticResultsPage.drawRightString(WidthMargin + LeftColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle - 8 * LineSpacing ,str.split(LeftHalluxProgression.get())[0])
-    
+                    StaticResultsPage.drawRightString(WidthMargin + LeftColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle - 9 * LineSpacing ,str.split(LeftHalluxProgression.get())[0])
+                    
     
                 # Static Posture- Left Direction
                 if len(str.split(LeftHindfootPitch.get())) > 1:
@@ -3659,8 +3791,10 @@ class StaticSubjectCalibrationReport_Page(tk.Frame):
                     StaticResultsPage.drawString(WidthMargin + LeftColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle - 6 * LineSpacing , '  ' + str.split(LeftForefootProgression.get())[1])
                 if len(str.split(LeftMidfootAbAdduction.get())) > 1:
                     StaticResultsPage.drawString(WidthMargin + LeftColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle - 7 * LineSpacing , '  ' + str.split(LeftMidfootAbAdduction.get())[1])
+                if len(str.split(LeftMidfootAbAdductionROT.get())) > 1:
+                    StaticResultsPage.drawString(WidthMargin + LeftColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle - 8 * LineSpacing , '  ' + str.split(LeftMidfootAbAdductionROT.get())[1])
                 if len(str.split(LeftHalluxProgression.get())) > 1:
-                    StaticResultsPage.drawString(WidthMargin + LeftColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle - 8 * LineSpacing , '  ' + str.split(LeftHalluxProgression.get())[1])
+                    StaticResultsPage.drawString(WidthMargin + LeftColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle - 9 * LineSpacing , '  ' + str.split(LeftHalluxProgression.get())[1])
                 
                 
                 # Static Posture- Right Values
@@ -3678,8 +3812,10 @@ class StaticSubjectCalibrationReport_Page(tk.Frame):
                     StaticResultsPage.drawRightString(WidthMargin + RightColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle - 6 * LineSpacing ,str.split(RightForefootProgression.get())[0])
                 if len(str.split(RightMidfootAbAdduction.get())) > 0:
                     StaticResultsPage.drawRightString(WidthMargin + RightColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle - 7 * LineSpacing ,str.split(RightMidfootAbAdduction.get())[0])
+                if len(str.split(RightMidfootAbAdductionROT.get())) > 0:
+                    StaticResultsPage.drawRightString(WidthMargin + RightColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle - 8 * LineSpacing ,str.split(RightMidfootAbAdductionROT.get())[0])
                 if len(str.split(RightHalluxProgression.get())) > 0:
-                    StaticResultsPage.drawRightString(WidthMargin + RightColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle - 8 * LineSpacing ,str.split(RightHalluxProgression.get())[0])
+                    StaticResultsPage.drawRightString(WidthMargin + RightColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle - 9 * LineSpacing ,str.split(RightHalluxProgression.get())[0])
     
     
                 # Static Posture- Right Direction
@@ -3697,8 +3833,10 @@ class StaticSubjectCalibrationReport_Page(tk.Frame):
                     StaticResultsPage.drawString(WidthMargin + RightColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle - 6 * LineSpacing , '  ' + str.split(RightForefootProgression.get())[1])
                 if len(str.split(RightMidfootAbAdduction.get())) > 1:
                     StaticResultsPage.drawString(WidthMargin + RightColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle - 7 * LineSpacing , '  ' + str.split(RightMidfootAbAdduction.get())[1])
+                if len(str.split(RightMidfootAbAdductionROT.get())) > 1:
+                    StaticResultsPage.drawString(WidthMargin + RightColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle - 8 * LineSpacing , '  ' + str.split(RightMidfootAbAdductionROT.get())[1])
                 if len(str.split(RightHalluxProgression.get())) > 1:
-                    StaticResultsPage.drawString(WidthMargin + RightColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle - 8 * LineSpacing , '  ' + str.split(RightHalluxProgression.get())[1])
+                    StaticResultsPage.drawString(WidthMargin + RightColumnSpacing, PageHeight - HeightMargin -VerticalOffsetFromTitle - 9 * LineSpacing , '  ' + str.split(RightHalluxProgression.get())[1])
     
                 
                 StaticResultsPage.showPage() # Finishes the Current Page
