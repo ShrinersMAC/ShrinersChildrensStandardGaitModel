@@ -206,3 +206,38 @@ Calculated angles (9, bilaterally) for the joints described above:
 > [!NOTE]
 > The Shriners Standard Foot Model does not attempt to provide kinetic calculations for the individual segments. Ankle kinetics are only described using the same methodology as the single segment foot model used in the Shriners Children’s Standard Gait Model (SCGM).
 
+# Dypstick/Pointer Model and Implementation
+The basics of how the pointer is used with our clinical models are outlined below.
+
+For more in-depth descriptions, refer to the [Dypstick_Pointer_Pelfix](User%20Guides/5.Dypstick_Pointer_Pelfix.pdf).
+
+## Dypstick Overview
+### Implementation
+The SMACnet Dypstick is a dynamic pointer consisting of two markers on a spring-loaded track. The linear displacement between PointerTip and PointerTail calculates a vector that drives the computation of a virtual marker at the location of the pointer’s tip. For individuals with excessive soft tissue over the location of the ASIS markers, the use of a Dypstick is strongly recommended to minimize soft tissue movement artefact.
+
+
+
+
+### Marker Set
+The Shriners Standard Foot Model consists of 45 markers in total. All segments besides the foot are defined the same way as the SCGM, so look above for those definitions.
+
+This section only covers the marker set for the feet
+
+#### *Foot:*
+|                                   | Landmark                                 | Location                                                                              |
+|----------------------------------:|------------------------------------------|---------------------------------------------------------------------------------------|
+| Left/Right_Lateral_Malleolus      | Fibula lateral malleolus                 | Lateral malleoli so marker center lies on ankle flexion/extension axis                |
+| Left/Right_Medial_Malleolus.Cal   | Tibia medial malleolus                   | Medial malleoli so marker center lies on ankle flexion/extension axis                 |
+| Left/Right_Posterior_Calcaneus    | Posterior calcaneus                      | Medial/lateral center of posterior calcaneus                                          |
+| Left/Right_Lateral_Calcaneus      | Lateral calcaneus                        | Lateral calcaneus, superior to bulge in heel pad                                      |
+| Left/Right_Medial_Calcaneus       | Medial calcaneus                         | Medial calcaneus, superior to bulge in heel pad                                       |
+| Left/Right_Peroneal_Trochlea.Cal  | Peroneal trochlea                        | Directly on peroneal trochlea of the lateral calcaneus                                |
+| Left/Right_1st_MT_Base            | Base of 1st metatarsal                   | Dorsal aspect of 1st metatarsal base, avoiding flexor hallucis longus tendon          |
+| Left/Right_1st_MT_Head            | Head of 1st metatarsal                   | Dorsal aspect of 1st metatarsal head, avoiding flexor hallucis longus tendon          |
+| Left/Right_1st_MT_Medial_Base.Cal | Base of 1st metatarsal                   | Medial aspect of base of 1st metatarsal                                               |
+| Left/Right_1st_MT_Medial_Head.Cal | Head of 1st metatarsal                   | Medial aspect of head of 1st metatarsal                                               |
+| Left/Right_2nd3rd_MT_Base.Cal     | Gap between 2nd and 3rd metatarsal bases | Dorsal aspect of the forefoot between 2nd and 3rd metatarsal bases                    |
+| Left/Right_2nd3rd_MT_Head.Cal     | Gap between 2nd and 3rd metatarsal heads | Dorsal aspect of the forefoot between 2nd and 3rd metatarsal heads (above MTP joints) |
+| Left/Right_5th_MT_Head            | Head of 5th metatarsal                   | Dorsal aspect of 5th metatarsal head, avoiding flexor digitorum longus tendon         |
+| Left/Right_1st_MTP_Joint.Cal      | 1st metatarsalphalongeal joint           | DOrsal aspect of 1st metatarsal head, just proximal to the MTP joint line             |
+| Left/Right_Hallux                 | Nail of hallux                           | Middle of the nail, aligning with the long axis of the hallux                         |
