@@ -216,28 +216,27 @@ For more in-depth descriptions, refer to the [Dypstick_Pointer_Pelfix](User%20Gu
 The SMACnet Dypstick is a dynamic pointer consisting of two markers on a spring-loaded track. The linear displacement between PointerTip and PointerTail calculates a vector that drives the computation of a virtual marker at the location of the pointer’s tip. For individuals with excessive soft tissue over the location of the ASIS markers, the use of a Dypstick is strongly recommended to minimize soft tissue movement artefact.
 
 
+![dypstick](User%20Guides/Media/dypstick.jpg)
 
+
+If a Dypstick is used to define virtual ASIS locations, an alternate marker set with three pelvic tracking markers is needed during data acquisition (see Marker Set below for standard model implementation). During the static standing trial, the pointer tip is placed at the location of the palpated landmark. The user depresses the device to define a vector from PointerTip to PointerTail. In post-processing, the virtual landmark is placed a known distance away from PointerTip along the direction of this vector. Known relationships between the virtually-defined ASIS locations and the pelvic tracking markers during the static calibration allow for the computation of virtual ASIS markers during walking trials
 
 ### Marker Set
-The Shriners Standard Foot Model consists of 45 markers in total. All segments besides the foot are defined the same way as the SCGM, so look above for those definitions.
+The Dypstick can be used with either model described above. The example markerset shown below is for the Dypstick implementation of the Shriners Children's Standard Gait Model (SCGM). Primary differences are the removal of the ASIS markers (which are placed virtually) and the inclusion of a Sacral_Triad marker, as well as the Pointer_Tip and Pointer_Tail markers for the dypstick.
 
-This section only covers the marker set for the feet
 
-#### *Foot:*
-|                                   | Landmark                                 | Location                                                                              |
-|----------------------------------:|------------------------------------------|---------------------------------------------------------------------------------------|
-| Left/Right_Lateral_Malleolus      | Fibula lateral malleolus                 | Lateral malleoli so marker center lies on ankle flexion/extension axis                |
-| Left/Right_Medial_Malleolus.Cal   | Tibia medial malleolus                   | Medial malleoli so marker center lies on ankle flexion/extension axis                 |
-| Left/Right_Posterior_Calcaneus    | Posterior calcaneus                      | Medial/lateral center of posterior calcaneus                                          |
-| Left/Right_Lateral_Calcaneus      | Lateral calcaneus                        | Lateral calcaneus, superior to bulge in heel pad                                      |
-| Left/Right_Medial_Calcaneus       | Medial calcaneus                         | Medial calcaneus, superior to bulge in heel pad                                       |
-| Left/Right_Peroneal_Trochlea.Cal  | Peroneal trochlea                        | Directly on peroneal trochlea of the lateral calcaneus                                |
-| Left/Right_1st_MT_Base            | Base of 1st metatarsal                   | Dorsal aspect of 1st metatarsal base, avoiding flexor hallucis longus tendon          |
-| Left/Right_1st_MT_Head            | Head of 1st metatarsal                   | Dorsal aspect of 1st metatarsal head, avoiding flexor hallucis longus tendon          |
-| Left/Right_1st_MT_Medial_Base.Cal | Base of 1st metatarsal                   | Medial aspect of base of 1st metatarsal                                               |
-| Left/Right_1st_MT_Medial_Head.Cal | Head of 1st metatarsal                   | Medial aspect of head of 1st metatarsal                                               |
-| Left/Right_2nd3rd_MT_Base.Cal     | Gap between 2nd and 3rd metatarsal bases | Dorsal aspect of the forefoot between 2nd and 3rd metatarsal bases                    |
-| Left/Right_2nd3rd_MT_Head.Cal     | Gap between 2nd and 3rd metatarsal heads | Dorsal aspect of the forefoot between 2nd and 3rd metatarsal heads (above MTP joints) |
-| Left/Right_5th_MT_Head            | Head of 5th metatarsal                   | Dorsal aspect of 5th metatarsal head, avoiding flexor digitorum longus tendon         |
-| Left/Right_1st_MTP_Joint.Cal      | 1st metatarsalphalongeal joint           | DOrsal aspect of 1st metatarsal head, just proximal to the MTP joint line             |
-| Left/Right_Hallux                 | Nail of hallux                           | Middle of the nail, aligning with the long axis of the hallux                         |
+
+|                                 | Landmark                                     | Location                                                                                                     |
+|--------------------------------:|----------------------------------------------|--------------------------------------------------------------------------------------------------------------|
+| C7                              | 7th cervical vertebra                        | Prominence of C7 vertebra                                                                                    |
+| Left/Right_Clavicle             | Sterno-clavicular                            | Thumb width below clavicle, equidistant from centerline of sternum                                           |
+| <mark>Sacral_Triad</mark>       | <mark>Simulated sacrum</mark>                | <mark>Superior to and equidistant from L/R PSIS</mark>                                                       |
+| Left/Right_Patella              | Patella                                      | Center of patella                                                                                            |
+| Left/Right_Lateral_Knee         | Lateral femoral condyle                      | Posterior lateral condyles at center of a visualized circle                                                  |
+| Left/Right_Medial_Knee.Cal      | Medial femoral condyle                       | Posterior medial condyles at the center of a visualized circle, which could be fit to this anatomy           |
+| Left/Right_Lower_Tibia          | Anterior tibia                               | On the anterior crest of lower third of tibia                                                                |
+| Left/Right_Lateral_Malleolus    | Fibula lateral malleolus                     | Lateral malleoli so that marker center lies on ankle flexion/extension axis.                                 |
+| Left/Right_Medial_Malleolus.Cal | Tibia medial malleolus                       | Medial malleoli so marker center lies on ankle flexion/extension axis.                                       |
+| Left/Right_Heel                 | Heel                                         | Medial/lateral center of posterior calcaneus                                                                 |
+| Left/Right_2nd3rd_MT_Head       | Gap between the 2nd and 3rd metatarsal heads | Dorsal aspect of foot between 2nd and 3rd metatarsal heads (above metatarsal-phalangeal joints)              |
+| <mark>Pointer_Tip.Cal/Pointer_Tail.Cal</mark>| <mark>Pointer markers Tip and Tail</mark>| <mark>Device markers a known distance away from the Dypstick pointer tip. Used to virtually define ASIS markers</mark>|
